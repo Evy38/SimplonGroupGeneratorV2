@@ -14,6 +14,7 @@ import { ApprenantDashboardComponent } from './features/apprenant/apprenant-dash
 import { ApprenantBriefListComponent } from './features/apprenant/apprenant-brief-list/apprenant-brief-list.component';
 import { ApprenantGroupeListComponent } from './features/apprenant/apprenant-groupe-list/apprenant-groupe-list.component';
 
+
 export const routes: Routes = [
 {
   path: 'auth',
@@ -53,6 +54,6 @@ export const routes: Routes = [
 },
 
 { path: '', redirectTo: '/auth', pathMatch: 'full' },
-{ path: '**', redirectTo: '/auth' } // Ou une page 404 si tu en as une
+{ path: '**', redirectTo: '/auth' }, // Ou une page 404 si tu en as une
 
 ]
