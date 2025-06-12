@@ -6,13 +6,12 @@
 <!-- Liste des cartes de promo -->
 <div class="promo-cards-container" [class.blurred]="isCreateOrEditModalOpen || isConfirmDeleteModalOpen">
   @for (promo of promos; track promo.id) {
-    <div class="promo-card" (click)="openPromoMembersModal(promo)"> <!-- CLASSE CHANGÉE -->
+    <div class="promo-card" (click)="openPromoMembersModal(promo)" (keydown)="openPromoMembersModal(promo)"> <!-- CLASSE CHANGÉE -->
       <!-- Tu peux ajouter un routerLink ici si cliquer sur une promo mène à une page de détail de la promo -->
-      <!-- <div class="promo-card-image-link-wrapper" [routerLink]="['/formateur/promos', promo.id]"> -->
       <div class="promo-card-image-link-wrapper">
         @if (promo.imageUrl) {
           <div class="promo-card-image">
-            <img [src]="promo.imageUrl" [alt]="'Image pour ' + promo.name">
+            <img [src]="promo.imageUrl" [alt]="promo.name">
           </div>
         } @else {
           <div class="promo-card-image placeholder-image">
@@ -47,8 +46,8 @@
 
 <!-- MODALE DE CRÉATION / MODIFICATION DE PROMO -->
 @if (isCreateOrEditModalOpen && currentPromoData) {
-  <div class="modal-overlay full-screen-modal-overlay" (click)="closeCreateOrEditModal()">
-    <div class="modal-content large-modal-content promo-modal-content" (click)="$event.stopPropagation()">
+  <div class="modal-overlay full-screen-modal-overlay" (click)="closeCreateOrEditModal()" (keydown)="closeCreateOrEditModal()">
+    <div class="modal-content large-modal-content promo-modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
       <button class="modal-close-button" (click)="closeCreateOrEditModal()" aria-label="Fermer la modale">×</button>
 
       <div class="modal-header">
@@ -100,9 +99,9 @@
           <h5>Ou choisir parmi les personnes disponibles :</h5>
           <div class="available-people-for-edit-list"> <!-- Réutiliser la classe si le style est similaire -->
             @for (person of getAvailablePeopleForSelection(); track person.id) {
-              <div class="person-item-to-add" (click)="addPersonToCurrentPromo(person)" title="Ajouter {{person.nom}} à la promo">
+              <button type="button" class="person-item-to-add" (click)="addPersonToCurrentPromo(person)" (keydown.enter)="addPersonToCurrentPromo(person)" title="Ajouter {{person.nom}} à la promo">
                 + {{ person.nom }} ({{person.email}})
-              </div>
+              </button>
             } @empty {
               <p>Toutes les personnes disponibles sont déjà dans cette promo.</p>
             }
@@ -124,8 +123,8 @@
 
 <!-- MODALE DE CONFIRMATION DE SUPPRESSION DE PROMO -->
 @if (isConfirmDeleteModalOpen && promoToDelete) {
-  <div class="modal-overlay confirm-delete-modal-overlay" (click)="closeConfirmDeletePromoModal()">
-    <div class="modal-content confirm-delete-modal-content" (click)="$event.stopPropagation()">
+  <div class="modal-overlay confirm-delete-modal-overlay" (click)="closeConfirmDeletePromoModal()" (keydown)="closeConfirmDeletePromoModal()">
+    <div class="modal-content confirm-delete-modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
       <button class="modal-close-button" (click)="closeConfirmDeletePromoModal()" aria-label="Fermer">×</button>
       <div class="modal-header">
         <h2>Confirmer la Suppression</h2>
@@ -144,8 +143,8 @@
 
 <!-- MODALE POUR AFFICHER LES MEMBRES D'UNE PROMO -->
 @if (isPromoMembersModalOpen && selectedPromoForMembers) {
-  <div class="modal-overlay members-promo-modal-overlay" (click)="closePromoMembersModal()"> <!-- Classe overlay spécifique si besoin -->
-    <div class="modal-content members-promo-modal-content" (click)="$event.stopPropagation()"> <!-- Classe contenu spécifique -->
+  <div class="modal-overlay members-promo-modal-overlay" (click)="closePromoMembersModal()" (keydown)="closePromoMembersModal()"> <!-- Classe overlay spécifique si besoin -->
+    <div class="modal-content members-promo-modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()"> <!-- Classe contenu spécifique -->
       <button class="modal-close-button" (click)="closePromoMembersModal()" aria-label="Fermer">×</button>
       <div class="modal-header">
         <h2>Membres de la Promo : {{ selectedPromoForMembers.name }}</h2>
@@ -153,7 +152,7 @@
       <div class="modal-body members-list-body"> <!-- Classe body spécifique -->
         @if (selectedPromoForMembers.members && selectedPromoForMembers.members.length > 0) {
           <ul class="members-ul"> <!-- Réutiliser les classes si le style est le même -->
-            @for (member of selectedPromoForMembers.members; track member.id) {
+               @for (member of selectedPromoForMembers.members; let i = $index; track i) {
               <li class="member-item">
                 <span class="member-name">{{ member.nom }}</span>
                 <div class="member-details">

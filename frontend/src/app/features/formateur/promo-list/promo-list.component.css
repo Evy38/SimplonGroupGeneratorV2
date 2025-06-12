@@ -30,7 +30,6 @@
   display: flex;
   flex-direction: column;
   transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-     box-shadow: 0 2px 6px rgba(0,0,0,0.60); 
 }
 .promo-card:hover {
   transform: translateY(-3px);
@@ -257,7 +256,7 @@
 .current-members-in-modal-list {
   list-style:none; padding:0; margin-bottom:10px;
   max-height: 120px; overflow-y: auto; /* Limiter la hauteur */
-  border: 1px solid #f0f0f0; border-radius: 4px; padding: 5px;
+  border: 1px solid #f0f0f0; border-radius: 4px;
 }
 .current-members-in-modal-list li {
   display:flex; justify-content:space-between; align-items:center;

@@ -1,14 +1,15 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-
 import { PromoListComponent } from './promo-list.component';
+import { provideHttpClient } from '@angular/common/http';
 
-describe('GroupListComponent', () => {
+describe('PromoListComponent', () => {
   let component: PromoListComponent;
   let fixture: ComponentFixture<PromoListComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [PromoListComponent]
+      imports: [PromoListComponent],
+      providers: [provideHttpClient()]
     })
     .compileComponents();
 

@@ -9,7 +9,14 @@ const groupRoutes = require("./routes/group.routes");
 const groupPeopleRoutes = require("./routes/groupPeople.routes");
 const generateGroupsRoutes = require("./routes/generateGroups.routes");
 
+const cors = require('cors');
+app.use(cors({
+  origin: 'http://localhost:4200', // Autorise uniquement ton frontend Angular
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  credentials: true
+}));
 
+app.use(cors());
 
 
 
