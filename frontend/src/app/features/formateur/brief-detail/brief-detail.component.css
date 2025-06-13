@@ -275,7 +275,7 @@
 .members-modal-content .member-detail { display: block; margin-left: 10px; margin-bottom: 2px; }
 .members-modal-content .member-detail:before { content: "• "; margin-right: 4px; }
 .large-modal-content .modal-form h4 { font-size: 1em; font-weight: 600; margin-bottom: 10px; margin-top: 20px; }
-.large-modal-content .current-members-in-modal-list { list-style:none; padding:0; margin-bottom:15px; max-height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 5px; border-radius: 4px; }
+.large-modal-content .current-members-in-modal-list { list-style:none; margin-bottom:15px; max-height: 150px; overflow-y: auto; border: 1px solid #eee; padding: 5px; border-radius: 4px; }
 .large-modal-content .current-members-in-modal-list li { display:flex; justify-content:space-between; align-items:center; padding:6px 8px; background-color:#f9f9f9; border-bottom:1px solid #eee; border-radius:4px; margin-bottom:5px; font-size:0.9em; }
 .large-modal-content .current-members-in-modal-list li:last-child { border-bottom: none; }
 .large-modal-content .current-members-in-modal-list em { font-size: 0.9em; color: #777; }
@@ -295,6 +295,12 @@
 .confirm-delete-modal-content .warning-text { color:#ca1c42; font-weight:500; margin-top:10px; font-size:0.9em; }
 .confirm-delete-modal-content .modal-footer.confirm-delete-buttons { justify-content:space-around; border-top: none; padding-top: 10px; }
 .large-modal-content { max-width: 500px; }
+
+.highlight-drop-zone {
+  border: 2px dashed #6ba87a;
+  background-color: #eaffea;
+}
+
 
 
 /* MEDIA QUERIES (TABLETTES ET DESKTOP) */

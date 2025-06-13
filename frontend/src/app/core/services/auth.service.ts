@@ -17,14 +17,14 @@ const ALL_USERS_STORAGE_KEY = 'allUsersSimplonApp'; // Clé pour persister la li
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUserSubject: BehaviorSubject<User | null>;
+  private readonly currentUserSubject: BehaviorSubject<User | null>;
   public currentUser$: Observable<User | null>;
 
   // La liste des utilisateurs sera modifiée par l'inscription.
   // Elle est chargée depuis localStorage ou initialisée.
   private users: User[];
 
-  constructor(private router: Router) {
+  constructor(private readonly router: Router) {
     // 1. Charger la liste complète des utilisateurs depuis localStorage (si elle existe)
     const storedAllUsers = localStorage.getItem(ALL_USERS_STORAGE_KEY);
     if (storedAllUsers) {
@@ -50,7 +50,6 @@ export class AuthService {
 
   login(email: string, password?: string): boolean {
     console.log(`AuthService: Tentative de connexion pour : ${email}`);
-    // console.log('AuthService: Liste des utilisateurs au moment du login:', JSON.parse(JSON.stringify(this.users)));
 
     const user = this.users.find(u => u.email === email && u.password === password);
 
@@ -130,7 +129,7 @@ export class AuthService {
   // La méthode getUserRole n'est pas définie ici mais est utilisée par le guard.
   // Si vous l'avez dans le guard, c'est ok, sinon on peut l'ajouter :
   getUserRole(): UserRole | null {
-    return this.currentUserValue?.role || null;
+    return this.currentUserValue?.role ?? null;
   }
 updateUserPassword(userId: string, newPasswordValue: string): void {
   const userIndex = this.users.findIndex(u => u.id === userId);

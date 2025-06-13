@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Brief } from '../../core/services/models/brief.model'; // Changement de chemin pour correspondre à ton arborescence probable
-import { Group } from '../../core/services/models/group.model'; // Importer Group
 import { Person } from '../../core/services/models/person.model'; // Importer Person
 import { UserRole } from '../../core/services/models/user.model'; // Importer UserRole si tu l'utilises dans Person
 
@@ -95,7 +94,7 @@ const INITIAL_BRIEFS_DATA: Brief[] = [
     name: 'Brief sans groupes initiaux',
     title: 'Brief sans groupes initiaux',
     description: 'Ce brief n\'a pas de groupes définis au départ.',
-    imageUrl: 'assets/placeholder-brief.png',
+    imageUrl: 'assets/jsp.png',
     sourceGroupId: 'grpPoneys',
     promoId: 'grpPoneys',
     creationDate: new Date('2024-04-01'),
@@ -108,7 +107,7 @@ const INITIAL_BRIEFS_DATA: Brief[] = [
 })
 export class BriefService {
   private briefsData: Brief[] = JSON.parse(JSON.stringify(INITIAL_BRIEFS_DATA));
-  private briefsSubject = new BehaviorSubject<Brief[]>(this.copyBriefsData());
+  private readonly briefsSubject = new BehaviorSubject<Brief[]>(this.copyBriefsData());
   public briefs$: Observable<Brief[]> = this.briefsSubject.asObservable();
 
   constructor() {
@@ -123,7 +122,6 @@ export class BriefService {
     return this.briefs$.pipe(
       map(allBriefs => {
         const foundBrief = allBriefs.find(brief => brief.id === id);
-        // console.log(`BriefService (getBriefById): Recherche ID '${id}'. Trouvé:`, foundBrief ? JSON.parse(JSON.stringify(foundBrief)) : 'Non');
         return foundBrief; // La copie est déjà faite par briefs$ qui émet des copies
       })
     );
@@ -132,9 +130,8 @@ export class BriefService {
   getBriefsByPromoId(promoId: string): Observable<Brief[]> {
     return this.briefs$.pipe(
       map(allBriefs => {
-        // console.log(`BriefService (getBriefsByPromoId): Tous les briefs de briefs$ pour filtrage promoId '${promoId}':`, JSON.parse(JSON.stringify(allBriefs)));
+
         const filteredBriefs = allBriefs.filter(brief => brief.promoId === promoId);
-        // console.log(`BriefService: Filtrage pour promoId '${promoId}', briefs trouvés:`, JSON.parse(JSON.stringify(filteredBriefs)));
         return filteredBriefs; // map sur un observable qui émet des copies renverra un tableau de ces copies
       })
     );

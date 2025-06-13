@@ -201,6 +201,7 @@
     font-weight: 500; margin-bottom: 6px; font-size: 14px; color: #444;
 }
 .modal-form input[type="text"],
+.modal-form input[type="email"],
 .modal-form input[type="url"],
 .modal-form select { /* Styles communs pour inputs/selects */
   width: 100%; padding: 10px 12px; border: 1px solid #ccc;
@@ -276,6 +277,7 @@
 .inline-form-group input[type="text"] { flex-grow: 1; }
 .button-add-person {
   padding: 9px 12px; /* Ajusté pour être similaire aux inputs */
+  margin-top: 20px;
   background-color: #28a745; color: white; border: none; border-radius: 6px;
   font-size: 0.9em; cursor: pointer; font-family: 'Montserrat', sans-serif; font-weight: 500;
 }

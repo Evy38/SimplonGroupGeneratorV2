@@ -28,9 +28,9 @@ export interface ApprenantGroupDisplayInfo {
   styleUrls: ['./apprenant-groupe-list.component.css']
 })
 export class ApprenantGroupeListComponent implements OnInit, OnDestroy {
-  private authService = inject(AuthService);
-  private briefService = inject(BriefService);
-  private subscriptions = new Subscription();
+  private readonly authService = inject(AuthService);
+  private readonly briefService = inject(BriefService);
+  private readonly subscriptions = new Subscription();
 
   currentUser: User | null = null;
   displayedGroupsInfo: ApprenantGroupDisplayInfo[] = [];
@@ -77,7 +77,7 @@ export class ApprenantGroupeListComponent implements OnInit, OnDestroy {
                   briefImageUrl: brief.imageUrl,
                   groupId: workGroup.id,
                   groupName: workGroup.name,
-                  groupMembers: workGroup.members.filter(member => member.id !== userId)
+                  groupMembers: this.getGroupMembersExcludingUser(workGroup.members, userId)
                 });
               }
             });
@@ -107,5 +107,9 @@ export class ApprenantGroupeListComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  private getGroupMembersExcludingUser(members: Person[], userId: string): Person[] {
+    return members.filter(member => member.id !== userId);
   }
 }

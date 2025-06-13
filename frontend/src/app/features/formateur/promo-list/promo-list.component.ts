@@ -60,6 +60,9 @@ export class PromoListComponent implements OnInit, OnDestroy {
   isPromoMembersModalOpen = false;
   selectedPromoForMembers: Group | null = null;
 
+  newPersonName: string = '';
+newPersonEmail: string = '';
+
   
   constructor(
     private readonly promoService: PromoService,
@@ -160,21 +163,23 @@ export class PromoListComponent implements OnInit, OnDestroy {
     this.newPersonInput = '';
   }
 
-  addPersonFromInput(): void {
-    const searchTerm = this.newPersonInput.trim().toLowerCase();
-    if (!searchTerm) return;
+addPersonFromInput() {
+  console.log("Tentative d'ajout :", this.newPersonInput);
 
-    const personFound = this.allAvailablePeopleForSelection.find(p =>
-      p.nom.toLowerCase().includes(searchTerm) ||
-      p.email?.toLowerCase().includes(searchTerm)
-    );
+  const person = this.getAvailablePeopleForSelection().find(
+    p => p.nom.toLowerCase().includes(this.newPersonInput.toLowerCase()) ||
+         p.email?.toLowerCase().includes(this.newPersonInput.toLowerCase())
+  );
 
-    if (personFound) {
-      this.addPersonToCurrentPromo(personFound);
-    } else {
-      this.formError = `Personne "${this.newPersonInput}" non trouvée dans la liste des personnes disponibles.`;
-    }
+  if (person) {
+    this.addPersonToCurrentPromo(person);
+    this.newPersonInput = '';
+  } else {
+    console.warn("Aucune personne trouvée pour :", this.newPersonInput);
+    this.formError = 'Aucune personne trouvée avec ce nom ou email';
   }
+}
+
 
   getAvailablePeopleForSelection(): Person[] {
     if (!this.currentPromoData?.members) {
@@ -214,4 +219,32 @@ export class PromoListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.promosSubscription?.unsubscribe();
   }
+
+  createAndAddPerson() {
+  if (!this.newPersonName || !this.newPersonEmail) {
+    this.formError = "Nom et email requis.";
+    return;
+  }
+
+  const newPerson: Person = {
+    id: Date.now().toString(), // 🔑 ID généré automatiquement
+    nom: this.newPersonName,
+    email: this.newPersonEmail,
+    genre: 'nsp', // ou '' selon ton besoin
+    aisanceFrancais: 1, // ou 0 si tu autorises
+    ancienDWWM: false,
+    niveauTechnique: 1, // ou 0
+    profil: '',
+    age: 0
+  };
+
+  this.currentPromoData.members.push(newPerson);
+
+  // Réinitialise les champs
+  this.newPersonName = '';
+  this.newPersonEmail = '';
+  this.formError = '';
+}
+
+
 }
