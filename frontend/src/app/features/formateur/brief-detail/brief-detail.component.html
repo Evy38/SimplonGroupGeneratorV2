@@ -13,32 +13,32 @@
     </p>
   </header>
 
-  <section class="generated-work-groups-section">
+  <section class="generated-work-groups-section" cdkDropListGroup>
     <h2>Sous-Groupes de Travail Générés <span class="drag-drop-hint">(Glissez-déposez pour modifier)</span></h2>
     @if (generatedWorkGroups.length > 0) {
-      <div class="work-group-list-container" cdkDropListGroup>
+      <div class="work-group-list-container" >
         @for (group of generatedWorkGroups; let i = $index; track i) {
           <div class="work-group-card" [class.highlight-drop-zone]="hoveredGroupId === group.id">
             <div class="work-group-header" >
               <h4 class="work-group-name">{{ group.name }}</h4>
               <div class="work-group-actions">
-                <button type="button" class="icon-button simple-edit-button"
+                <!-- <button type="button" class="icon-button simple-edit-button"
                         (click)="openEditWorkGroupModal(group, $event)">
                   <img src="assets/pen.png" alt="Modifier">
                 </button>
                 <button type="button" class="icon-button simple-delete-button"
                         (click)="openDeleteWorkGroupConfirmModal(group, $event)">
-                  <img src="assets/trash.png" alt="Supprimer">
-                </button>
+                  <img src="assets/trash.png" alt="Supprimer"> -->
+                <!-- </button> -->
               </div>
             </div>
             <ul class="work-group-members-list"
-                cdkDropList
-                [id]="'group-list-' + group.id"
-                [cdkDropListData]="group.members"
-                (cdkDropListDropped)="dropMember($event, group.id.toString())"
-                (cdkDropListEntered)="onDragEntered(group.id.toString())"
-                (cdkDropListExited)="onDragExited()">
+    cdkDropList
+    [cdkDropListData]="group.members"
+    (cdkDropListDropped)="dropMember($event, group.id.toString())"
+    (cdkDropListEntered)="onDragEntered(group.id.toString())"
+    (cdkDropListExited)="onDragExited()">
+
               @for (member of group.members; let i = $index; track i) {
                 <li class="member-name-item" cdkDrag [cdkDragData]="member"
                     (cdkDragStarted)="onDragStarted(member)">
@@ -57,9 +57,15 @@
         <div class="unassigned-members-pool-container">
           <h4>Membres non assignés ({{ unassignedMembersFromBrief.length }})</h4>
           <div class="work-group-card unassigned-pool">
-            <ul class="work-group-members-list" cdkDropList id="unassigned-members-list"
-                [cdkDropListData]="unassignedMembersFromBrief"
-                (cdkDropListDropped)="dropMember($event, null)">
+           <ul class="work-group-members-list"
+    cdkDropList
+    id="unassigned-members-pool"
+    [cdkDropListData]="unassignedMembersFromBrief"
+    [cdkDropListConnectedTo]="connectedDropListIds"
+    (cdkDropListDropped)="dropMember($event, 'unassigned')"
+    (cdkDropListEntered)="onDragEntered('unassigned')"
+    (cdkDropListExited)="onDragExited()">
+
               @for (person of unassignedMembersFromBrief; let i = $index; track i) {
                 <li class="member-name-item" cdkDrag [cdkDragData]="person"
                     (cdkDragStarted)="onDragStarted(person)">

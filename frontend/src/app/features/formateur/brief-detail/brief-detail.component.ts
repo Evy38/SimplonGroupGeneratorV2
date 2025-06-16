@@ -71,6 +71,17 @@ export class BriefDetailComponent implements OnInit, OnDestroy {
 
   hasUnsavedWorkGroupChanges = false;
 
+   /**
+   * IDs of every drop list so the CDK knows which lists are connected.
+   * This helps avoid cases where drag & drop fails to transfer items
+   * between lists when the group detection does not pick up dynamic lists.
+   */
+  get connectedDropListIds(): string[] {
+    const ids = this.generatedWorkGroups.map(g => `group-list-${g.id}`);
+    ids.push('unassigned-members-list');
+    return ids;
+  }
+
   hoveredGroupId: string | null = null;
   draggedPerson: Person | null = null;
 
@@ -302,7 +313,7 @@ export class BriefDetailComponent implements OnInit, OnDestroy {
       while (
         membersForNewWorkGroup.length < groupSize &&
         availablePeople.length > 0 &&
-        attemptsToFillGroup < peopleInSourceGroup.length * 2
+        attemptsToFillGroup < (peopleInSourceGroup?.length ?? 0) * 2
       ) {
         attemptsToFillGroup++;
         let bestCandidateIndex = -1;
@@ -378,14 +389,13 @@ export class BriefDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  private removePersonFromAllGroups(person: Person): void {
-    for (const g of this.generatedWorkGroups) {
-      g.members = g.members.filter(m => m.id !== person.id);
-    }
-    this.unassignedMembersFromBrief = this.unassignedMembersFromBrief.filter(
-      p => p.id !== person.id
-    );
-  }
+removePersonFromAllGroups(person: Person): void {
+  this.generatedWorkGroups.forEach(group => {
+    group.members = group.members.filter(m => m.id !== person.id);
+  });
+  this.unassignedMembersFromBrief = this.unassignedMembersFromBrief.filter(m => m.id !== person.id);
+}
+
 
   dropMember(
     event: CdkDragDrop<Person[], any, Person>,

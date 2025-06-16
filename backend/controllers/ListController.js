@@ -1,30 +1,96 @@
 const ListModel = require("../models/ListModel");
+const SharedListModel = require("../models/SharedListModel");
 
 const ListController = {
+  // 🔍 Récupère toutes les listes (admin)
   getAllLists: (req, res) => {
     ListModel.getAll((err, lists) => {
-      if (err) {
-        res.status(500).json({ error: "Erreur serveur" });
-        return;
-      }
+      if (err) return res.status(500).json({ error: "Erreur serveur" });
       res.json(lists);
     });
   },
 
-  createList: (req, res) => {
-    const { nom, user_id } = req.body;
-    if (!nom || !user_id) {
-      return res.status(400).json({ error: "Nom et user_id requis" });
-    }
+  // 🔍 Récupère les listes d’un utilisateur spécifique
+  getUserLists: (req, res) => {
+    const userId = req.user.id;
+    ListModel.getByUserId(userId, (err, lists) => {
+      if (err) return res.status(500).json({ error: "Erreur récupération listes" });
+      res.json(lists);
+    });
+  },
 
-    ListModel.create(nom, user_id, (err, newList) => {
-      if (err) {
-        return res.status(500).json({ error: "Erreur lors de l'insertion" });
-      }
+  // ✅ Crée une nouvelle liste
+  createList: (req, res) => {
+    const { nom } = req.body;
+    const userId = req.user.id;
+
+    if (!nom) return res.status(400).json({ error: "Nom requis" });
+
+    ListModel.create(nom, userId, (err, newList) => {
+      if (err) return res.status(500).json({ error: "Erreur création" });
       res.status(201).json(newList);
     });
+  },
+
+  // ✏️ Modifie le nom d’une liste
+  updateList: (req, res) => {
+    const listId = req.params.id;
+    const { nom } = req.body;
+
+    if (!nom) return res.status(400).json({ error: "Nouveau nom requis" });
+
+    ListModel.update(listId, nom, (err, result) => {
+      if (err) return res.status(500).json({ error: "Erreur mise à jour" });
+      res.json({ message: "Liste mise à jour" });
+    });
+  },
+
+  // ❌ Supprime une liste
+  deleteList: (req, res) => {
+    const listId = req.params.id;
+
+    ListModel.delete(listId, (err, result) => {
+      if (err) return res.status(500).json({ error: "Erreur suppression" });
+      res.json({ message: "Liste supprimée" });
+    });
+  },
+
+  // 📊 Donne les détails d’une liste
+  getListDetails: (req, res) => {
+    const listId = req.params.id;
+
+    ListModel.getDetails(listId, (err, data) => {
+      if (err) return res.status(500).json({ error: "Erreur récupération détails" });
+      res.json(data);
+    });
+  },
+
+  // 🤝 Partage une liste avec un autre utilisateur
+  shareList: (req, res) => {
+    const { listId, targetUserId } = req.body;
+    const userId = req.user.id;
+
+    if (!listId || !targetUserId) {
+      return res.status(400).json({ error: "Champs requis" });
+    }
+
+    ListModel.shareWithUser(listId, targetUserId, userId, (err, result) => {
+      if (err) return res.status(500).json({ error: "Erreur de partage" });
+      res.json({ message: "Liste partagée" });
+    });
+  },
+
+  // 📂 Affiche les listes partagées reçues par un utilisateur
+  getSharedLists: async (req, res) => {
+    try {
+      const userId = req.user.id; // depuis le middleware verifyToken
+      const sharedLists = await SharedListModel.getSharedWithUser(userId);
+      res.json(sharedLists);
+    } catch (e) {
+      console.error("Erreur getSharedLists :", e);
+      res.status(500).json({ error: "Erreur serveur" });
+    }
   }
 };
 
 module.exports = ListController;
-

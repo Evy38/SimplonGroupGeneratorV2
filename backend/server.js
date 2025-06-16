@@ -8,6 +8,8 @@ const personRoutes = require("./routes/person.routes");
 const groupRoutes = require("./routes/group.routes");
 const groupPeopleRoutes = require("./routes/groupPeople.routes");
 const generateGroupsRoutes = require("./routes/generateGroups.routes");
+const routes = require("./routes");
+require('dotenv').config();
 
 const cors = require('cors');
 app.use(cors({
@@ -41,3 +43,6 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`Serveur démarré sur http://localhost:${PORT}`);
 });
+
+// ⛳ Point d'entrée unique de toutes les routes
+app.use("/api", routes); // exemple: /api/users/register

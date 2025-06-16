@@ -26,4 +26,6 @@ export class ListService {
   createList(list: Partial<List>): Observable<List> {
     return this.http.post<List>(this.apiUrl, list);
   }
+
+  
 }
