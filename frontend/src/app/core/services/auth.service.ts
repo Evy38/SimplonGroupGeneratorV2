@@ -53,13 +53,13 @@ export class AuthService {
 
     const user = this.users.find(u => u.email === email && u.password === password);
 
-   if (user) {
-  console.log(`AuthService LOGIN: Tentative de sauvegarde de l'utilisateur dans localStorage avec la clé: ${USER_STORAGE_KEY}`, user); // NOUVEAU LOG
-  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
-  this.currentUserSubject.next(user);
-  console.log('AuthService: Connexion réussie pour:', user);
-  return true;
-}
+    if (user) {
+      console.log(`AuthService LOGIN: Tentative de sauvegarde de l'utilisateur dans localStorage avec la clé: ${USER_STORAGE_KEY}`, user); // NOUVEAU LOG
+      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+      this.currentUserSubject.next(user);
+      console.log('AuthService: Connexion réussie pour:', user);
+      return true;
+    }
 
     console.warn('AuthService: Échec de la connexion - identifiants incorrects ou utilisateur non trouvé.');
     // S'assurer que localStorage est vidé si la connexion échoue après une tentative précédente
@@ -131,24 +131,34 @@ export class AuthService {
   getUserRole(): UserRole | null {
     return this.currentUserValue?.role ?? null;
   }
-updateUserPassword(userId: string, newPasswordValue: string): void {
-  const userIndex = this.users.findIndex(u => u.id === userId);
-  if (userIndex > -1) {
-    // Mettre à jour dans la liste en mémoire this.users
-    this.users[userIndex] = { ...this.users[userIndex], password: newPasswordValue };
-    console.log('AuthService: Mot de passe mis à jour en mémoire pour', this.users[userIndex].email);
+  updateUserPassword(userId: string, newPasswordValue: string): void {
+    const userIndex = this.users.findIndex(u => u.id === userId);
+    if (userIndex > -1) {
+      // Mettre à jour dans la liste en mémoire this.users
+      this.users[userIndex] = { ...this.users[userIndex], password: newPasswordValue };
+      console.log('AuthService: Mot de passe mis à jour en mémoire pour', this.users[userIndex].email);
 
-    // Si l'utilisateur mis à jour est l'utilisateur actuellement connecté, mettre à jour le currentUserSubject et localStorage
-    if (this.currentUserSubject.value && this.currentUserSubject.value.id === userId) {
-      const updatedCurrentUser = { ...this.currentUserSubject.value, password: newPasswordValue };
-      this.currentUserSubject.next(updatedCurrentUser);
-      localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedCurrentUser));
-      console.log('AuthService: Utilisateur connecté mis à jour (mot de passe) et sauvegardé dans localStorage.');
+      // Si l'utilisateur mis à jour est l'utilisateur actuellement connecté, mettre à jour le currentUserSubject et localStorage
+      if (this.currentUserSubject.value && this.currentUserSubject.value.id === userId) {
+        const updatedCurrentUser = { ...this.currentUserSubject.value, password: newPasswordValue };
+        this.currentUserSubject.next(updatedCurrentUser);
+        localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(updatedCurrentUser));
+        console.log('AuthService: Utilisateur connecté mis à jour (mot de passe) et sauvegardé dans localStorage.');
+      }
+
+      // Sauvegarder la liste complète des utilisateurs (avec le nouveau mot de passe)
+      localStorage.setItem(ALL_USERS_STORAGE_KEY, JSON.stringify(this.users));
+    } else {
+      console.warn('AuthService: Utilisateur non trouvé pour la mise à jour du mot de passe, ID:', userId);
     }
-
-    // Sauvegarder la liste complète des utilisateurs (avec le nouveau mot de passe)
-    localStorage.setItem(ALL_USERS_STORAGE_KEY, JSON.stringify(this.users));
-  } else {
-    console.warn('AuthService: Utilisateur non trouvé pour la mise à jour du mot de passe, ID:', userId);
   }
-}}
+
+  getAuthHeaders(): { [header: string]: string } {
+  const token = localStorage.getItem('token'); // ou sessionStorage selon ton app
+  return {
+    'Authorization': `Bearer ${token}`,
+    'Content-Type': 'application/json'
+  };
+}
+
+}

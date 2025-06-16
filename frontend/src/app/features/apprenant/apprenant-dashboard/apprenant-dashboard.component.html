@@ -1,11 +1,16 @@
 <div class="dashboard-container">
-    
+ 
+
 
    @if (currentUser) {
     <h1>Bienvenue, {{ currentUser.name }} !</h1>
   } @else {
     <h1>Bienvenue sur votre Dashboard !</h1>
   } 
+
+     @if (promoName) {
+  <p class="promo-info">🎓 Promo : <strong>{{ promoName }}</strong></p>
+}
   <p>
     Ici, vous trouverez un aperçu de vos activités, des briefs en cours et des informations importantes.
   </p>
@@ -18,4 +23,7 @@
       <p><strong>Rôle :</strong> {{ currentUser.role }}</p>
     </div>
   }
+
+
+  
 </div>

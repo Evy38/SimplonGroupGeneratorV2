@@ -58,7 +58,7 @@ const INITIAL_PROMOS_DATA: Group[] = [
   providedIn: 'root'
 })
 export class PromoService {
-  private promosSubject = new BehaviorSubject<Group[]>(
+  private readonly promosSubject = new BehaviorSubject<Group[]>(
     JSON.parse(JSON.stringify(INITIAL_PROMOS_DATA))
   );
   // Observable public auquel les composants peuvent s'abonner pour obtenir la liste des promos.
@@ -88,6 +88,13 @@ export class PromoService {
       })
     );
   }
+  getPromoByEmail(email: string): Group | undefined {
+  const promos = this.promosSubject.getValue();
+  return promos.find(promo =>
+    promo.members.some(member => member.email === email)
+  );
+}
+
 
   /** Retourne une copie des membres d'une promo spécifique. */
   getPromoMembersCopy(promoId: string | number): Person[] {
@@ -182,6 +189,4 @@ export class PromoService {
     this.saveDataToLocalStorage(updatedPromos);
   }
 }
-  // TODO: Ajouter des méthodes pour créer une nouvelle promo, supprimer une promo, modifier le nom/image d'une promo.
-  // Ces méthodes suivront le même principe : obtenir la valeur actuelle, créer une nouvelle liste/objet avec
-  // les modifications, puis appeler this.promosSubject.next(nouvelleListe).
+ 

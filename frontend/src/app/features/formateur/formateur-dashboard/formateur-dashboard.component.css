@@ -1,0 +1,41 @@
+/* Style pour le tableau de bord formateur */
+div {
+  background-color: #f9f9f9; /* Fond clair pour une bonne visibilité */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Ombre légère */
+  max-width: 1200px;
+  margin: 20px auto;
+}
+
+/* Titre du tableau de bord formateur */
+div h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+/* Texte d'introduction */
+div p {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Responsivité pour les petits écrans */
+@media (max-width: 768px) {
+  div {
+    padding: 15px;
+  }
+
+  div h1 {
+    font-size: 1.5rem;
+  }
+
+  div p {
+    font-size: 0.9rem;
+  }
+}

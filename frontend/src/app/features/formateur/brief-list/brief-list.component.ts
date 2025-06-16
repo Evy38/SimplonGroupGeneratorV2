@@ -12,6 +12,8 @@ import { Group } from '../../../core/services/models/group.model'; // Ajusté po
 import { BriefService } from '../../../core/services/brief.service';
 import { PromoService } from '../../../core/services/promo.service';
 
+import { HttpClient } from '@angular/common/http';
+
 @Component({
   selector: 'app-brief-list',
   standalone: true,
@@ -37,16 +39,16 @@ export class BriefListComponent implements OnInit {
     creationDate: Date | null; // Ajouté pour être explicite
     assignedGroupId: string | number | null;
   } = {
-    id: null,
-    name: '',
-    title: '', // Initialiser
-    description: '',
-    imageUrl: '',
-    sourceGroupId: null,
-    promoId: null, // Initialiser
-    creationDate: null, // Initialiser
-    assignedGroupId: null,
-  };
+      id: null,
+      name: '',
+      title: '', // Initialiser
+      description: '',
+      imageUrl: '',
+      sourceGroupId: null,
+      promoId: null, // Initialiser
+      creationDate: null, // Initialiser
+      assignedGroupId: null,
+    };
 
   formError: string | null = null;
   formSuccess: string | null = null;
@@ -55,9 +57,20 @@ export class BriefListComponent implements OnInit {
   briefToDeleteId: string | null = null;
   briefNameToDelete: string | null = null;
 
+  briefs: any[] = [];
+  groupsMap: { [briefId: string]: any[] } = {};
+
+
+  availableGroups: any[] = [];
+  selectedBriefId: number | null = null;
+  selectedGroupId: number | null = null;
+
+
+
   constructor(
-    private briefService: BriefService,
-    private promoService: PromoService
+    private readonly briefService: BriefService,
+    private readonly promoService: PromoService,
+    private readonly http: HttpClient
   ) {
     this.briefs$ = this.briefService.briefs$;
     this.promos$ = this.promoService.promos$.pipe(
@@ -91,6 +104,27 @@ export class BriefListComponent implements OnInit {
         );
       }
     });
+
+    this.briefService.getBriefsByMe().subscribe({
+      next: (briefs) => {
+        this.briefs = briefs;
+        for (let brief of briefs) {
+          this.briefService.getGroupsForBrief(brief.id).subscribe({
+            next: (groups) => this.groupsMap[brief.id] = groups,
+            error: (err) => console.error("Erreur groupes :", err)
+          });
+        }
+
+        this.promoService.getAllPromos().subscribe({
+          next: (groups) => this.availableGroups = groups,
+          error: (err) => console.error("Erreur chargement des groupes :", err)
+        });
+
+
+      },
+      error: (err) => console.error("Erreur briefs :", err)
+    });
+
   }
 
   openCreateBriefModal(): void {
@@ -119,11 +153,11 @@ export class BriefListComponent implements OnInit {
       name: brief.name, // Ou brief.title si c'est la source de vérité
       title: brief.title, // Pré-remplir
       description: brief.description,
-      imageUrl: brief.imageUrl || '',
+      imageUrl: brief.imageUrl ?? '',
       sourceGroupId: brief.sourceGroupId,
       promoId: brief.promoId, // Pré-remplir
       creationDate: brief.creationDate, // Pré-remplir
-      assignedGroupId: brief.assignedGroupId || null,
+      assignedGroupId: brief.assignedGroupId ?? null,
     };
     this.formError = null;
     this.formSuccess = null;
@@ -254,4 +288,33 @@ export class BriefListComponent implements OnInit {
       this.formError = null;
     }, 2500);
   }
+
+  assignGroupToBrief(): void {
+    if (!this.selectedBriefId || !this.selectedGroupId) return;
+
+    const token = localStorage.getItem('token');
+    const headers = { 'Authorization': `Bearer ${token}` };
+
+    this.http.post('/api/briefs/assign', {
+      brief_id: this.selectedBriefId,
+      group_id: this.selectedGroupId
+    }, { headers }).subscribe({
+      next: () => {
+        this.selectedBriefId = null;
+        this.selectedGroupId = null;
+        this.briefService.getBriefsByMe().subscribe(b => this.briefs = b);
+        // ou refresher briefs$ si besoin
+      },
+      error: (err: any) => console.error("Erreur assignation :", err)
+    });
+  }
+
+  handleModalKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      this.closeCreateBriefModal();
+    }
+  }
+
+
+
 }

@@ -1,0 +1,66 @@
+/* Style général pour la page dashboard */
+.dashboard-container {
+  background-color: #f9f9f9; /* Fond clair pour l'ergonomie */
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Ombre légère */
+  max-width: 1200px;
+  margin: 20px auto;
+}
+
+/* Style du titre principal */
+.dashboard-container h1 {
+  font-size: 2rem;
+  color: #333;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+/* Style de la section texte d'introduction */
+.dashboard-container p {
+  font-size: 1rem;
+  color: #555;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Détails utilisateur */
+.user-details {
+  background-color: #ffffff;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+/* Détails des informations utilisateurs */
+.user-details p {
+  margin: 10px 0;
+  font-size: 1rem;
+  color: #555;
+}
+
+.user-details strong {
+  color: #333;
+  font-weight: 600;
+}
+
+/* Adaptation mobile */
+@media (max-width: 768px) {
+  .dashboard-container {
+    padding: 15px;
+  }
+
+  .dashboard-container h1 {
+    font-size: 1.5rem;
+  }
+
+  .user-details {
+    padding: 15px;
+  }
+
+  .user-details p {
+    font-size: 0.9rem;
+  }
+}

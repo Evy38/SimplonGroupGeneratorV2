@@ -1,5 +1,18 @@
 /* src/app/features/formateur/brief-detail/brief-detail.component.css */
-
+.page-header.brief-detail-header {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  padding: 20px 25px;
+  max-width: 650px;
+  margin: 0 auto 30px auto;
+}
+.page-header.brief-detail-header h1 {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+}
 /* Styles existants pour la page (conservés) */
 .brief-detail-header {
   margin-bottom: 30px;
@@ -23,16 +36,18 @@
 }
 /* .brief-detail-image { ... } <- Cette classe ne semble pas utilisée dans le HTML actuel pour le brief lui-même */
 .brief-detail-description {
-  font-size: 1.1em;
-  line-height: 1.7;
+  font-size: 1rem;
   color: #555;
-  margin-bottom: 15px;
-  white-space: pre-wrap;
+  margin-bottom: 6px;
+  line-height: 1.5;
 }
 .brief-promo-info {
-  font-size: 0.95em;
-  color: #777;
-  margin-top: 10px;
+  font-size: 0.9rem;
+  color: #888;
+}
+.brief-promo-info strong {
+  color: #333;
+  font-weight: 600;
 }
 
 /* Section des groupes générés */

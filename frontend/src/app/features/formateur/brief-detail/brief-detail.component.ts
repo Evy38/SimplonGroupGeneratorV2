@@ -15,6 +15,7 @@ import { Person } from '../../../core/services/models/person.model';
 import { PromoService } from '../../../core/services/promo.service';
 import { BriefService } from '../../../core/services/brief.service';
 
+
 import {
   CdkDragDrop,
   moveItemInArray,
@@ -201,7 +202,13 @@ export class BriefDetailComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.subscriptions.add(this.viewData$.subscribe());
+    this.updateDropListIds();
   }
+updateDropListIds(): void {
+  // This method is no longer needed since connectedDropListIds is a getter.
+  // If you need to trigger change detection, do it here.
+  this.cdr.detectChanges();
+}
 
   simulateInitialGroupGeneration(): void {
     if (

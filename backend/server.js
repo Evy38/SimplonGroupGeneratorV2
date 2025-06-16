@@ -9,6 +9,9 @@ const groupRoutes = require("./routes/group.routes");
 const groupPeopleRoutes = require("./routes/groupPeople.routes");
 const generateGroupsRoutes = require("./routes/generateGroups.routes");
 const routes = require("./routes");
+
+const briefRoutes = require("./routes/brief.routes");
+
 require('dotenv').config();
 
 const cors = require('cors');
@@ -22,6 +25,7 @@ app.use(cors());
 
 
 
+
 // Middleware
 app.use(express.json());
 app.use("/users", userRoutes);
@@ -30,7 +34,7 @@ app.use("/people", personRoutes);
 app.use("/groups", groupRoutes);
 app.use("/group-people", groupPeopleRoutes);
 app.use("/generate-groups", generateGroupsRoutes);
-
+app.use("/api/briefs", briefRoutes);
 
 
 

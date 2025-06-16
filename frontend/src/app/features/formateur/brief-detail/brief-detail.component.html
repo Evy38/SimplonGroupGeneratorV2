@@ -1,9 +1,10 @@
 @if (viewData$ | async; as data) {
+   <a routerLink="/formateur/briefs" class="back-to-list-link">← Retour à la liste des briefs</a>
   <header class="page-header brief-detail-header">
-    <a routerLink="/formateur/briefs" class="back-to-list-link">← Retour à la liste des briefs</a>
+   
     <h1>{{ data.brief.name }}</h1>
     <p class="brief-detail-description">{{ data.brief.description }}</p>
-    <p class="brief-promo-info">
+     <p class="brief-promo-info">
       <em>Promo associée :
         <strong>{{ data.sourceGroup.name }}</strong>
         @if (data.sourceGroup.members) {
@@ -11,78 +12,83 @@
         }
       </em>
     </p>
+  
   </header>
 
   <section class="generated-work-groups-section" cdkDropListGroup>
-    <h2>Sous-Groupes de Travail Générés <span class="drag-drop-hint">(Glissez-déposez pour modifier)</span></h2>
-    @if (generatedWorkGroups.length > 0) {
-      <div class="work-group-list-container" >
-        @for (group of generatedWorkGroups; let i = $index; track i) {
-          <div class="work-group-card" [class.highlight-drop-zone]="hoveredGroupId === group.id">
-            <div class="work-group-header" >
-              <h4 class="work-group-name">{{ group.name }}</h4>
-              <div class="work-group-actions">
-                <!-- <button type="button" class="icon-button simple-edit-button"
-                        (click)="openEditWorkGroupModal(group, $event)">
-                  <img src="assets/pen.png" alt="Modifier">
-                </button>
-                <button type="button" class="icon-button simple-delete-button"
-                        (click)="openDeleteWorkGroupConfirmModal(group, $event)">
-                  <img src="assets/trash.png" alt="Supprimer"> -->
-                <!-- </button> -->
-              </div>
+  <h2>Sous-Groupes de Travail Générés <span class="drag-drop-hint">(Glissez-déposez pour modifier)</span></h2>
+
+  @if (generatedWorkGroups.length > 0) {
+    <div class="work-group-list-container">
+      @for (group of generatedWorkGroups; let i = $index; track i) {
+        <div class="work-group-card" [class.highlight-drop-zone]="hoveredGroupId === group.id">
+          <div class="work-group-header">
+            <h4 class="work-group-name">{{ group.name }}</h4>
+            <div class="work-group-actions">
+              <!-- Boutons d’action (optionnels) -->
             </div>
-            <ul class="work-group-members-list"
-    cdkDropList
-    [cdkDropListData]="group.members"
-    (cdkDropListDropped)="dropMember($event, group.id.toString())"
-    (cdkDropListEntered)="onDragEntered(group.id.toString())"
-    (cdkDropListExited)="onDragExited()">
-
-              @for (member of group.members; let i = $index; track i) {
-                <li class="member-name-item" cdkDrag [cdkDragData]="member"
-                    (cdkDragStarted)="onDragStarted(member)">
-                  {{ member.nom }}
-                </li>
-              }
-              @if (group.members.length === 0) {
-                <li class="no-members-in-card-drag-placeholder">Déposez des membres ici</li>
-              }
-            </ul>
           </div>
-        }
-      </div>
 
-      @if (data?.sourceGroup?.members && unassignedMembersFromBrief) {
-        <div class="unassigned-members-pool-container">
-          <h4>Membres non assignés ({{ unassignedMembersFromBrief.length }})</h4>
-          <div class="work-group-card unassigned-pool">
-           <ul class="work-group-members-list"
-    cdkDropList
-    id="unassigned-members-pool"
-    [cdkDropListData]="unassignedMembersFromBrief"
-    [cdkDropListConnectedTo]="connectedDropListIds"
-    (cdkDropListDropped)="dropMember($event, 'unassigned')"
-    (cdkDropListEntered)="onDragEntered('unassigned')"
-    (cdkDropListExited)="onDragExited()">
+          <ul class="work-group-members-list"
+              cdkDropList
+              [id]="'group-' + group.id"
+              [cdkDropListData]="group.members"
+              [cdkDropListConnectedTo]="connectedDropListIds"
+              (cdkDropListDropped)="dropMember($event, group.id.toString())"
+              (cdkDropListEntered)="onDragEntered(group.id.toString())"
+              (cdkDropListExited)="onDragExited()">
+              
+            @for (member of group.members; let i = $index; track i) {
+              <li class="member-name-item"
+                  cdkDrag
+                  [cdkDragData]="member"
+                  (cdkDragStarted)="onDragStarted(member)">
+                {{ member.nom }}
+              </li>
+            }
 
-              @for (person of unassignedMembersFromBrief; let i = $index; track i) {
-                <li class="member-name-item" cdkDrag [cdkDragData]="person"
-                    (cdkDragStarted)="onDragStarted(person)">
-                  {{ person.nom }}
-                </li>
-              }
-              @if (unassignedMembersFromBrief.length === 0) {
-                <li class="no-members-in-card-drag-placeholder">Aucun membre non assigné.</li>
-              }
-            </ul>
-          </div>
+            @if (group.members.length === 0) {
+              <li class="no-members-in-card-drag-placeholder">Déposez des membres ici</li>
+            }
+          </ul>
         </div>
-      } @else {
-        <p class="empty-list-message">Aucun groupe généré. Cliquez sur le dé pour commencer.</p>
       }
+    </div>
+
+    @if (data?.sourceGroup?.members && unassignedMembersFromBrief) {
+      <div class="unassigned-members-pool-container">
+        <h4>Membres non assignés ({{ unassignedMembersFromBrief.length }})</h4>
+        <div class="work-group-card unassigned-pool">
+          <ul class="work-group-members-list"
+              cdkDropList
+              id="unassigned"
+              [cdkDropListData]="unassignedMembersFromBrief"
+              [cdkDropListConnectedTo]="connectedDropListIds"
+              (cdkDropListDropped)="dropMember($event, 'unassigned')"
+              (cdkDropListEntered)="onDragEntered('unassigned')"
+              (cdkDropListExited)="onDragExited()">
+
+            @for (person of unassignedMembersFromBrief; let i = $index; track i) {
+              <li class="member-name-item"
+                  cdkDrag
+                  [cdkDragData]="person"
+                  (cdkDragStarted)="onDragStarted(person)">
+                {{ person.nom }}
+              </li>
+            }
+
+            @if (unassignedMembersFromBrief.length === 0) {
+              <li class="no-members-in-card-drag-placeholder">Aucun membre non assigné.</li>
+            }
+          </ul>
+        </div>
+      </div>
+    } @else {
+      <p class="empty-list-message">Aucun groupe généré. Cliquez sur le dé pour commencer.</p>
     }
-  </section>
+  }
+</section>
+
 
   <section class="save-work-groups-action-section">
     @if (generatedWorkGroups.length > 0 || hasUnsavedWorkGroupChanges) {
@@ -167,3 +173,4 @@
 } @else {
   <p class="loading-message">Chargement des détails du brief ou brief non trouvé...</p>
 }
+

@@ -1,5 +1,4 @@
 const ListModel = require("../models/ListModel");
-const SharedListModel = require("../models/SharedListModel");
 
 const ListController = {
   // 🔍 Récupère toutes les listes (admin)
@@ -80,17 +79,6 @@ const ListController = {
     });
   },
 
-  // 📂 Affiche les listes partagées reçues par un utilisateur
-  getSharedLists: async (req, res) => {
-    try {
-      const userId = req.user.id; // depuis le middleware verifyToken
-      const sharedLists = await SharedListModel.getSharedWithUser(userId);
-      res.json(sharedLists);
-    } catch (e) {
-      console.error("Erreur getSharedLists :", e);
-      res.status(500).json({ error: "Erreur serveur" });
-    }
-  }
 };
 
 module.exports = ListController;

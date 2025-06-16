@@ -9,8 +9,6 @@ router.use(verifyToken);
 // 👤 Récupère les listes de l’utilisateur connecté
 router.get("/me", ListController.getUserLists);
 
-// 📂 Récupère les listes partagées avec l’utilisateur connecté
-router.get("/shared", ListController.getSharedLists);
 
 // ✅ Créer une liste
 router.post("/", ListController.createList);
@@ -26,11 +24,5 @@ router.get("/details/:id", ListController.getListDetails);
 
 // 🛠 Admin uniquement : récupérer toutes les listes (optionnel)
 router.get("/", ListController.getAllLists);
-
-// 🔄 Route pour partager une liste
-const ListSharingController = require("../controllers/ListSharingController");
-router.post("/share", ListSharingController.share);
-
-
 
 module.exports = router;

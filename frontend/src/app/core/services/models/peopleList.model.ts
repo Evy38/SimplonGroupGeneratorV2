@@ -7,3 +7,5 @@ export interface PeopleList {
   people: Person[];
   numberOfDraws?: number; // Nombre de tirages réalisés avec cette liste (optionnel)
 }
+
+

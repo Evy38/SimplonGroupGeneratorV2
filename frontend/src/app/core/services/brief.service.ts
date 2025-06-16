@@ -2,19 +2,17 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Brief } from '../../core/services/models/brief.model'; // Changement de chemin pour correspondre à ton arborescence probable
-import { Person } from '../../core/services/models/person.model'; // Importer Person
-import { UserRole } from '../../core/services/models/user.model'; // Importer UserRole si tu l'utilises dans Person
+import { Brief } from '../../core/services/models/brief.model'; 
+import { Person } from '../../core/services/models/person.model';
+import { UserRole } from '../../core/services/models/user.model'; 
+import { HttpClient } from '@angular/common/http';
 
-// --- DÉFINITION DES PERSONNES DE TEST (POUR FACILITER LA LECTURE) ---
-// Tu devrais avoir un seul endroit pour définir tes Personnes mockées
-// Idéalement dans un fichier séparé ou au moins une seule constante partagée.
-// Pour cet exemple, je les définis ici. Adapte avec tes propres objets Person.
+
 const apprenantTestUser: Person = {
-  id: 'user-apprenant-id', // ID de ton apprenant test (utilisé dans AuthService)
+  id: 'user-apprenant-id', 
   nom: 'Apprenant Test User',
   email: 'apprenant@test.com',
-  role: UserRole.APPRENANT, // Assure-toi que UserRole est bien défini et importé
+  role: UserRole.APPRENANT, 
   genre: 'nsp',
   aisanceFrancais: 3,
   ancienDWWM: false,
@@ -110,7 +108,7 @@ export class BriefService {
   private readonly briefsSubject = new BehaviorSubject<Brief[]>(this.copyBriefsData());
   public briefs$: Observable<Brief[]> = this.briefsSubject.asObservable();
 
-  constructor() {
+  constructor(private readonly http: HttpClient) {
     console.log('BriefService initialisé avec:', JSON.parse(JSON.stringify(this.briefsSubject.getValue())));
   }
 
@@ -186,4 +184,17 @@ export class BriefService {
     console.warn(`BriefService: Tentative de suppression d'un brief non trouvé (ID: ${briefId})`);
     return of(false);
   }
+
+  getBriefsByMe(): Observable<any[]> {
+  const token = localStorage.getItem('token');
+  const headers = { 'Authorization': `Bearer ${token}` };
+  return this.http.get<any[]>('/api/briefs/me', { headers });
+}
+
+getGroupsForBrief(briefId: number): Observable<any[]> {
+  const token = localStorage.getItem('token');
+  const headers = { 'Authorization': `Bearer ${token}` };
+  return this.http.get<any[]>(`/api/briefs/${briefId}/groups`, { headers });
+}
+
 }
