@@ -1,5 +1,8 @@
 <div class="profile-container">
-  <h2>Mon Profil</h2>
+  <h2>Mon Profil</h2> <div class="back-to-dashboard-container">
+  <button class="button-primary" (click)="navigateToDashboard()">⬅️ Retour au Dashboard</button>
+</div>
+
 
   @if (currentUser) {
     <div class="profile-section">
@@ -65,8 +68,7 @@
           @for (promo of userPromos; track promo.id) {
             <li>
               {{ promo.name }}
-              <!-- Ici, pour afficher les formateurs, il faudrait une logique supplémentaire -->
-              <!-- Exemple : <p>Formateur(s) : {{ getFormateursForPromo(promo) }}</p> -->
+
             </li>
           }
         </ul>

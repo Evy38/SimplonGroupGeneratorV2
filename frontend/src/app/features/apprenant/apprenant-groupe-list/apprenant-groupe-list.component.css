@@ -123,6 +123,99 @@
 }
 
 
+/* Modale - Détail du Brief (App Modale Style) */
+.modal-overlay.apprenant-brief-detail-modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+  padding: 15px;
+  box-sizing: border-box;
+}
+
+.modal-content.apprenant-brief-detail-modal-content {
+  background-color: #ffffff;
+  padding: 25px 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-close-button {
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  font-weight: bold;
+  color: #777;
+  cursor: pointer;
+  padding: 5px;
+}
+.modal-close-button:hover {
+  color: #333;
+}
+
+.modal-header {
+  text-align: center;
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #eaeaea;
+}
+.modal-header h2 {
+  font-size: 22px;
+  color: #2c3e50;
+  font-weight: 600;
+  margin: 0;
+}
+
+.modal-body {
+  padding: 10px 0;
+  flex-grow: 1;
+}
+
+.modal-body p {
+  font-size: 0.95em;
+  color: #444;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+
+.modal-footer.buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 15px;
+  border-top: 1px solid #f0f0f0;
+}
+
+.button-secondary {
+  background-color: #6c757d;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.95em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.button-secondary:hover {
+  background-color: #5a6268;
+}
+
 /* Responsive pour tablettes et PC */
 @media (min-width: 768px) {
   .page-header h1 { font-size: 28px; }

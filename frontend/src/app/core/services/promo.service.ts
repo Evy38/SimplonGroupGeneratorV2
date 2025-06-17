@@ -4,6 +4,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { map } from 'rxjs/operators'; // Importe map
 import { Group } from '../../core/services/models/group.model';   // Représente tes "Promos"
 import { Person } from '../../core/services/models/person.model';
+import { HttpClient } from '@angular/common/http'; 
 
 // --- DÉFINITION DES DONNÉES DE BASE (PRIVÉES AU SERVICE) ---
 const MOCK_PEOPLE_DATA: Person[] = [
@@ -58,14 +59,20 @@ const INITIAL_PROMOS_DATA: Group[] = [
   providedIn: 'root'
 })
 export class PromoService {
+   private readonly apiUrl = 'http://localhost:3000/api/promos';
   private readonly promosSubject = new BehaviorSubject<Group[]>(
     JSON.parse(JSON.stringify(INITIAL_PROMOS_DATA))
   );
   // Observable public auquel les composants peuvent s'abonner pour obtenir la liste des promos.
    public promos$: Observable<Group[]> = this.promosSubject.asObservable();
 
-  constructor() {
+  constructor(private readonly http: HttpClient) {
     console.log("PromoService initialisé. Promos actuelles:", this.promosSubject.value);
+  }
+
+   // 🔍 Obtenir les membres d'une promo par son ID
+  getMembersByPromoId(promoId: string): Observable<Person[]> {
+    return this.http.get<Person[]>(`${this.apiUrl}/${promoId}/people`);
   }
 
    private saveDataToLocalStorage(promos: Group[]): void { // Optionnel, pour persistance locale

@@ -31,11 +31,38 @@ export class ApprenantGroupeListComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly briefService = inject(BriefService);
   private readonly subscriptions = new Subscription();
+  
 
   currentUser: User | null = null;
   displayedGroupsInfo: ApprenantGroupDisplayInfo[] = [];
   isLoading: boolean = true;
   errorMessage: string | null = null;
+
+  selectedBriefId: string | null = null;
+  selectedBrief: any = null; // Ajout de la propriété pour stocker le brief sélectionné
+isBriefModalOpen: boolean = false;
+
+openBriefModal(briefId: string): void {
+  this.briefService.getBriefById(briefId).subscribe({
+    next: (brief) => {
+      this.selectedBrief = brief;
+      this.isBriefModalOpen = true;
+    },
+    error: () => {
+      this.selectedBrief = null;
+      this.isBriefModalOpen = false;
+      this.errorMessage = "Impossible de charger le brief.";
+    }
+  });
+}
+
+
+closeBriefModal(): void {
+  this.selectedBrief = null;
+  this.isBriefModalOpen = false;
+}
+
+
 
   ngOnInit(): void {
     this.currentUser = this.authService.currentUserValue;

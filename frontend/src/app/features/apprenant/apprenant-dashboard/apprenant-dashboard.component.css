@@ -46,6 +46,106 @@
   font-weight: 600;
 }
 
+
+/* =========================== */
+/* 🎓 Modale "Ma Promo" Apprenant */
+/* =========================== */
+
+.modal-overlay.apprenant-promo-modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100vw; height: 100vh;
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1050;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.modal-content.apprenant-promo-modal-content {
+  background-color: #ffffff;
+  padding: 25px 30px;
+  border-radius: 12px;
+  box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+  width: 100%;
+  max-width: 500px;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.modal-close-button {
+  position: absolute;
+  top: 12px; right: 15px;
+  background: none;
+  border: none;
+  font-size: 28px;
+  font-weight: bold;
+  color: #777;
+  cursor: pointer;
+  line-height: 1;
+}
+.modal-close-button:hover {
+  color: #333;
+}
+
+.modal-header h2 {
+  text-align: center;
+  font-size: 22px;
+  color: #123744;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.modal-body ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.modal-body ul li {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eaeaea;
+  font-size: 0.95em;
+  color: #333;
+}
+
+.modal-footer.buttons {
+  margin-top: 25px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  border-top: 1px solid #eee;
+  padding-top: 15px;
+}
+
+/* Conteneur du bouton */
+.promo-button-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+}
+
+/* Style du bouton "Ma Promo" */
+.promo-modal-button {
+  background-color: #14343c;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+.promo-modal-button:hover {
+  background-color: #0d2329;
+}
+
 /* Adaptation mobile */
 @media (max-width: 768px) {
   .dashboard-container {

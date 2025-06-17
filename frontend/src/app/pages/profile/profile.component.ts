@@ -8,6 +8,7 @@ import { Person } from '../../core/services/models/person.model'; // Si vous vou
 import { PromoService } from '../../core/services/promo.service';
 import { Group } from '../../core/services/models/group.model'; // 'Group' est utilisé pour les Promos
 
+import { Router } from '@angular/router';
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -29,14 +30,15 @@ export class ProfileComponent implements OnInit {
   passwordFieldType = 'password'; // Pour afficher/masquer le mdp
 
   constructor(
-    private authService: AuthService,
-    private promoService: PromoService
+    private readonly authService: AuthService,
+    private readonly promoService: PromoService,
+    private readonly router: Router
   ) {}
 
   ngOnInit(): void {
     this.currentUser = this.authService.currentUserValue;
 
-    if (this.currentUser && this.currentUser.email) {
+    if (this.currentUser?.email) {
       // Récupérer les promos de l'utilisateur
       this.promoService.promos$.subscribe(allPromos => {
         this.userPromos = allPromos.filter(promo =>
@@ -78,24 +80,24 @@ export class ProfileComponent implements OnInit {
       return;
     }
 
-    // --- SIMULATION DE CHANGEMENT DE MOT DE PASSE ---
-    // Dans une vraie application, vous appelleriez un service backend ici.
-    // Ici, nous allons juste mettre à jour l'objet currentUser en mémoire (et dans localStorage via AuthService).
-    console.log(`Simulation: Mot de passe demandé à changer de "${this.currentPassword}" à "${this.newPassword}"`);
-
-    // Mettre à jour l'utilisateur dans AuthService (simulé)
-    // Idéalement, AuthService aurait une méthode updateUser ou updatePassword
-    const updatedUser = { ...this.currentUser, password: this.newPassword };
-
-    // Simuler la mise à jour dans la liste mockUsers de AuthService (si vous voulez que ça persiste un peu plus)
-    // Cette partie est délicate car mockUsers est souvent une constante.
-    // Pour une simulation complète, il faudrait que AuthService puisse modifier sa liste `users`.
-    // Le plus simple ici est de mettre à jour le currentUser stocké et le localStorage.
 
     this.authService.updateUserPassword(this.currentUser.id, this.newPassword); // Supposons que cette méthode existe dans AuthService
     this.currentUser = this.authService.currentUserValue; // Recharger l'utilisateur mis à jour
 
     this.passwordChangeMessage = 'Mot de passe changé avec succès (simulation) !';
     this.showPasswordForm = false;
+  }
+
+  navigateToDashboard(): void {
+  const user = this.authService.currentUserValue;
+  if (!user) return;
+
+  if (user.role === 'formateur') {
+    this.router.navigate(['/formateur/dashboard']);
+  } else if (user.role === 'apprenant') {
+    this.router.navigate(['/apprenant/dashboard']);
+  } else {
+    this.router.navigate(['/']); // page d'accueil ou fallback
+  }
   }
 }

@@ -5,48 +5,82 @@
 
 <div class="apprenant-group-list-container">
   @if (isLoading) {
-    <p class="loading-message">Chargement de vos groupes...</p>
+  <p class="loading-message">Chargement de vos groupes...</p>
   } @else if (errorMessage) {
-    <p class="error-message">{{ errorMessage }}</p>
+  <p class="error-message">{{ errorMessage }}</p>
   } @else {
-    @if (displayedGroupsInfo.length > 0) {
-      <div class="apprenant-groups-grid">
-        @for (item of displayedGroupsInfo; track item.groupId) {
-          <div class="apprenant-group-card">
-            <div class="apprenant-group-card-header">
-              <h3 class="brief-title-in-card">{{ item.briefTitle }}</h3>
-              @if (item.briefImageUrl) {
-                <img [src]="item.briefImageUrl" [alt]="item.briefTitle" class="brief-image-in-card">
-              } @else {
-                <div class="brief-image-placeholder-in-card">
-                  <span>{{ item.briefTitle ? item.briefTitle.substring(0,1).toUpperCase() : 'B' }}</span>
-                </div>
-              }
-            </div>
-            <div class="apprenant-group-card-body">
-              <h4 class="apprenant-group-name">Votre équipe : {{ item.groupName }}</h4>
-              @if (item.groupMembers.length > 0) {
-                <p class="coequipiers-label">Vos coéquipier(e)s :</p>
-                <ul class="coequipiers-list">
-                  @for (member of item.groupMembers; track member.id) {
-                    <li>{{ member.nom }}</li>
-                  }
-                </ul>
-              } @else {
-                <p class="no-coequipiers">Vous êtes seul(e) dans ce groupe pour le moment.</p>
-              }
-            </div>
-            <div class="apprenant-group-card-footer">
-              <a [routerLink]="['/apprenant/briefs', item.briefId]" class="button-secondary view-brief-button">
-                Voir le Brief
-              </a>
-              <!-- Tu pourrais ajouter un bouton pour voir plus de détails sur le groupe si nécessaire -->
-            </div>
-          </div>
+  @if (displayedGroupsInfo.length > 0) {
+  <div class="apprenant-groups-grid">
+    @for (item of displayedGroupsInfo; track item.groupId) {
+    <div class="apprenant-group-card">
+      <div class="apprenant-group-card-header">
+        <h3 class="brief-title-in-card">{{ item.briefTitle }}</h3>
+        @if (item.briefImageUrl) {
+        <img [src]="item.briefImageUrl" [alt]="item.briefTitle" class="brief-image-in-card">
+        } @else {
+        <div class="brief-image-placeholder-in-card">
+          <span>{{ item.briefTitle ? item.briefTitle.substring(0,1).toUpperCase() : 'B' }}</span>
+        </div>
         }
       </div>
-    } @else {
-      <p class="no-groups-message empty-list-message">Vous n'êtes actuellement affecté(e) à aucun groupe de travail.</p>
+      <div class="apprenant-group-card-body">
+        <h4 class="apprenant-group-name">Votre équipe : {{ item.groupName }}</h4>
+        @if (item.groupMembers.length > 0) {
+        <p class="coequipiers-label">Vos coéquipier(e)s :</p>
+        <ul class="coequipiers-list">
+          @for (member of item.groupMembers; track member.id) {
+          <li>{{ member.nom }}</li>
+          }
+        </ul>
+        } @else {
+        <p class="no-coequipiers">Vous êtes seul(e) dans ce groupe pour le moment.</p>
+        }
+      </div>
+    <button type="button"
+        class="button-secondary view-brief-button"
+        (click)="openBriefModal(item.briefId)">
+  Voir le Brief
+</button>
+
+
+    </div>
     }
+  </div>
+  } @else {
+  <p class="no-groups-message empty-list-message">Vous n'êtes actuellement affecté(e) à aucun groupe de travail.</p>
+  }
   }
 </div>
+
+@if (isBriefModalOpen && selectedBrief) {
+  <div class="modal-overlay apprenant-brief-detail-modal-overlay" (click)="closeBriefModal()" (keydown)="closeBriefModal()">
+    <div class="modal-content apprenant-brief-detail-modal-content" (click)="$event.stopPropagation()" (keydown)="closeBriefModal()">
+      <button class="modal-close-button" (click)="closeBriefModal()" aria-label="Fermer">×</button>
+
+      <div class="modal-header">
+        <h2>{{ selectedBrief.title }}</h2>
+      </div>
+
+      <div class="modal-body">
+        @if (selectedBrief.imageUrl) {
+          <div class="brief-detail-image-container">
+            <img [src]="selectedBrief.imageUrl" [alt]="selectedBrief.title" class="brief-detail-image">
+          </div>
+        }
+        <div class="brief-detail-section">
+          <h4>Description :</h4>
+          <p>{{ selectedBrief.description }}</p>
+        </div>
+        <div class="brief-detail-section" *ngIf="selectedBrief.creationDate">
+          <h4>Date de création :</h4>
+          <p>{{ selectedBrief.creationDate | date:'fullDate' }}</p>
+        </div>
+      </div>
+
+      <div class="modal-footer buttons">
+        <button type="button" class="button-secondary" (click)="closeBriefModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+}
+

@@ -9,8 +9,16 @@
   } 
 
      @if (promoName) {
-  <p class="promo-info">🎓 Promo : <strong>{{ promoName }}</strong></p>
+  <div class="promo-button-container">
+  <button type="button" class="button-secondary promo-modal-button" (click)="openPromoModal()">
+    <strong> 🎓 {{ promoName }}</strong>
+  </button>
+</div>
+
 }
+
+
+
   <p>
     Ici, vous trouverez un aperçu de vos activités, des briefs en cours et des informations importantes.
   </p>
@@ -23,6 +31,32 @@
       <p><strong>Rôle :</strong> {{ currentUser.role }}</p>
     </div>
   }
+
+
+ @if (isPromoModalOpen) {
+  <div class="modal-overlay apprenant-promo-modal-overlay" (click)="closePromoModal()" (keydown)="closePromoModal()">
+    <div class="modal-content apprenant-promo-modal-content" (click)="$event.stopPropagation()" (keydown)="closePromoModal()">
+      <button class="modal-close-button" (click)="closePromoModal()" aria-label="Fermer la modale">×</button>
+
+      <div class="modal-header">
+        <h2>Promo : {{ currentPromoName }}</h2>
+      </div>
+
+      <div class="modal-body">
+        <ul>
+          @for (person of currentPromoMembers; track person.id) {
+            <li>{{ person.nom }}</li>
+          }
+        </ul>
+      </div>
+
+      <div class="modal-footer buttons">
+        <button class="button-secondary" (click)="closePromoModal()">Fermer</button>
+      </div>
+    </div>
+  </div>
+}
+
 
 
   

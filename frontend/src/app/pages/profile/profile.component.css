@@ -157,3 +157,28 @@
 .formateur-info strong {
   color: #444;
 }
+
+.back-to-dashboard-container {
+  margin-top: 30px;
+  text-align: right;
+}
+
+.back-to-dashboard-container .button-primary {
+  background-color: #123744; /* Bleu foncé cohérent avec d'autres boutons */
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 0.95em;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.back-to-dashboard-container .button-primary:hover {
+  background-color: #0d2329;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
