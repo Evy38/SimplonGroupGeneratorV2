@@ -9,7 +9,7 @@ import {
 } from 'rxjs';
 
 import { Brief } from '../../../core/services/models/brief.model';
-import { Group } from '../../../core/services/models/group.model';
+import { Promo} from '../../../core/services/models/promo.model';
 import { Person } from '../../../core/services/models/person.model';
 
 import { PromoService } from '../../../core/services/promo.service';
@@ -30,15 +30,17 @@ import {
   templateUrl: './brief-detail.component.html',
   styleUrls: ['./brief-detail.component.css']
 })
+
+
 export class BriefDetailComponent implements OnInit, OnDestroy {
   brief$: Observable<Brief | undefined>;
-  sourceGroupForBrief$: Observable<Group | undefined>;
-  viewData$: Observable<{ brief: Brief; sourceGroup: Group } | undefined>;
+  sourceGroupForBrief$: Observable<Promo | undefined>;
+  viewData$: Observable<{ brief: Brief; sourceGroup: Promo } | undefined>;
 
   brief: Brief | undefined;
-  sourceGroupForBrief: Group | undefined;
+  sourceGroupForBrief: Promo | undefined;
 
-  generatedWorkGroups: Group[] = [];
+  generatedWorkGroups: Promo[] = [];
   unassignedMembersFromBrief: Person[] = [];
 
   isGenerateGroupsModalOpen = false;
@@ -54,13 +56,13 @@ export class BriefDetailComponent implements OnInit, OnDestroy {
   generationError: string | null = null;
 
   isMembersModalOpen = false;
-  selectedWorkGroupForMembers: Group | null = null;
+  selectedWorkGroupForMembers: Promo| null = null;
 
   isEditWorkGroupModalOpen = false;
-  selectedWorkGroupToEdit: Group | null = null;
+  selectedWorkGroupToEdit: Promo| null = null;
   editableWorkGroupData!: {
     id: string | number;
-    name: string;
+    nom: string;
     members: Person[];
     imageUrl?: string;
   };
@@ -68,15 +70,11 @@ export class BriefDetailComponent implements OnInit, OnDestroy {
   newPersonInput = '';
 
   isDeleteWorkGroupConfirmModalOpen = false;
-  workGroupToDelete: Group | null = null;
+  workGroupToDelete: Promo| null = null;
 
   hasUnsavedWorkGroupChanges = false;
 
-   /**
-   * IDs of every drop list so the CDK knows which lists are connected.
-   * This helps avoid cases where drag & drop fails to transfer items
-   * between lists when the group detection does not pick up dynamic lists.
-   */
+
   get connectedDropListIds(): string[] {
     const ids = this.generatedWorkGroups.map(g => `group-list-${g.id}`);
     ids.push('unassigned-members-list');
@@ -192,13 +190,14 @@ export class BriefDetailComponent implements OnInit, OnDestroy {
     );
   }
 
-  private createEmptyPromoPlaceholder(id?: string | number | null): Group {
-    return {
-      id: id?.toString() ?? 'unknown-promo-id',
-      name: 'Promo source non trouvée',
-      members: []
-    };
-  }
+private createEmptyPromoPlaceholder(id?: string | number | null): Promo {
+  return {
+    id: id?.toString() ?? 'unknown-promo-id',
+    nom: 'Promo source non trouvée',
+    members: []
+  };
+}
+
 
   ngOnInit(): void {
     this.subscriptions.add(this.viewData$.subscribe());
@@ -293,7 +292,7 @@ updateDropListIds(): void {
         availablePeople[i]
       ];
     }
-    const newWorkGroups: Group[] = [];
+    const newWorkGroups: Promo[] = [];
     let workGroupCounter = 1;
     const numTargetGroups =
       numberOfWorkGroupsToSimulate ||
@@ -357,7 +356,7 @@ updateDropListIds(): void {
       if (membersForNewWorkGroup.length > 0) {
         newWorkGroups.push({
           id: `brief-${this.brief?.id || 'unknown'}-wg-${Date.now()}-${workGroupCounter}`,
-          name: `Équipe ${workGroupCounter}`,
+          nom: `Équipe ${workGroupCounter}`,
           members: membersForNewWorkGroup
         });
         workGroupCounter++;
@@ -366,7 +365,7 @@ updateDropListIds(): void {
     if (availablePeople.length > 0 && !numberOfWorkGroupsToSimulate) {
       newWorkGroups.push({
         id: `brief-${this.brief?.id || 'unknown'}-wg-${Date.now()}-${workGroupCounter}`,
-        name: `Équipe ${workGroupCounter} (Reste)`,
+        nom: `Équipe ${workGroupCounter} (Reste)`,
         members: availablePeople
       });
     }
@@ -381,10 +380,12 @@ updateDropListIds(): void {
       return;
     }
     const assignedMemberIds = new Set<string>();
-    this.generatedWorkGroups.forEach(group => {
-      group.members.forEach(member =>
-        assignedMemberIds.add(member.id)
-      );
+    this.generatedWorkGroups.forEach(promo=> {
+      if (promo.members) {
+        promo.members.forEach(member =>
+          assignedMemberIds.add(member.id)
+        );
+      }
     });
     this.unassignedMembersFromBrief = allPromoMembers.filter(
       person => !assignedMemberIds.has(person.id)
@@ -397,8 +398,10 @@ updateDropListIds(): void {
   }
 
 removePersonFromAllGroups(person: Person): void {
-  this.generatedWorkGroups.forEach(group => {
-    group.members = group.members.filter(m => m.id !== person.id);
+  this.generatedWorkGroups.forEach(promo=> {
+    if (promo.members) {
+      promo.members = promo.members.filter(m => m.id !== person.id);
+    }
   });
   this.unassignedMembersFromBrief = this.unassignedMembersFromBrief.filter(m => m.id !== person.id);
 }
@@ -438,7 +441,7 @@ removePersonFromAllGroups(person: Person): void {
         g.members === event.previousContainer.data ||
         g.members === event.container.data
       ) {
-        return { ...g, members: [...g.members] };
+        return { ...g, members: [...(g.members ?? [])] };
       }
       return g;
     });
@@ -531,7 +534,7 @@ removePersonFromAllGroups(person: Person): void {
   }
 
   openWorkGroupMembersModal(
-    workGroup: Group,
+    workGroup: Promo,
     event: MouseEvent
   ): void {
     event.stopPropagation();
@@ -544,7 +547,7 @@ removePersonFromAllGroups(person: Person): void {
   }
 
   openEditWorkGroupModal(
-    workGroup: Group,
+    workGroup: Promo,
     event?: MouseEvent
   ): void {
     event?.stopPropagation();
@@ -564,7 +567,7 @@ removePersonFromAllGroups(person: Person): void {
       this.editWorkGroupError = 'Données invalides.';
       return;
     }
-    if (!this.editableWorkGroupData.name.trim()) {
+    if (!this.editableWorkGroupData.nom.trim()) {
       this.editWorkGroupError = 'Nom requis.';
       return;
     }
@@ -648,7 +651,7 @@ removePersonFromAllGroups(person: Person): void {
   }
 
   openDeleteWorkGroupConfirmModal(
-    workGroup: Group,
+    workGroup: Promo,
     event?: MouseEvent
   ): void {
     event?.stopPropagation();
@@ -674,9 +677,12 @@ removePersonFromAllGroups(person: Person): void {
     }
   }
 
-  private updateCollaborationHistory(workGroups: Group[]): void {
-    workGroups.forEach(group => {
-      const memberIds = group.members.map(m => m.id.toString());
+  private updateCollaborationHistory(workGroups: Promo[]): void {
+    workGroups.forEach(promo=> {
+      if (!promo.members) {
+        return;
+      }
+      const memberIds = promo.members.map(m => m.id.toString());
       for (let i = 0; i < memberIds.length; i++) {
         const person1Id = memberIds[i];
         if (!this.collaborationHistory.has(person1Id)) {

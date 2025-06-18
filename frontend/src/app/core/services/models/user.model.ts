@@ -4,12 +4,13 @@ export enum UserRole {
 }
 
 export interface User {
-  id: string;
+  id?: string;
+  firstname: string;
+  lastname: string;
   email: string;
-  name: string;
-  password?: string; // Le mot de passe ne devrait pas toujours être exposé, mais nécessaire pour la simulation
+  password?: string;
   role: UserRole;
-  promoId?: string;
-  age?: number;
-
+  is_active?: boolean;
+  created_at?: string;
+  cgu_accepted_at?: string;
 }

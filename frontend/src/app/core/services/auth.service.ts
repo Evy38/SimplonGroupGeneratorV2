@@ -6,9 +6,30 @@ import { Router } from '@angular/router';
 
 
 const INITIAL_MOCK_USERS: User[] = [
-  { id: 'user-formateur-id', email: 'formateur@test.com', name: 'Formateur Test', role: UserRole.FORMATEUR, password: 'password' },
-  { id: 'user-apprenant-id', email: 'apprenant@test.com', name: 'Apprenant Test', role: UserRole.APPRENANT, password: 'password', promoId: "grpPoneys" },
+  {
+    id: 'user-formateur-id',
+    firstname: 'Formateur',
+    lastname: 'Test',
+    email: 'formateur@test.com',
+    password: 'password',
+    role: UserRole.FORMATEUR,
+    is_active: true,
+    created_at: '2025-06-17',
+    cgu_accepted_at: '2025-06-17',
+  },
+  {
+    id: 'user-apprenant-id',
+    firstname: 'Apprenant',
+    lastname: 'Test',
+    email: 'apprenant@test.com',
+    password: 'password',
+    role: UserRole.APPRENANT,
+    is_active: true,
+    created_at: '2025-06-17',
+    cgu_accepted_at: '2025-06-17',
+  }
 ];
+
 
 const USER_STORAGE_KEY = 'currentUserSimplonApp'; // Clé pour localStorage
 const ALL_USERS_STORAGE_KEY = 'allUsersSimplonApp'; // Clé pour persister la liste des utilisateurs si besoin
@@ -93,15 +114,19 @@ export class AuthService {
       return { success: false, message: 'Cet email est déjà utilisé.' };
     }
 
-    const newUserId = `user-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const fullName = userData.name.split(' ');
 
-    const newUser: User = {
-      id: newUserId,
+    const newUser = {
+      firstname: fullName[0],
+      lastname: fullName.slice(1).join(' ') || '',
       email: userData.email,
-      password: userPassword, // Assurez-vous de hasher les mdp en production !
-      name: userData.name,
-      role: role,
+      password: userPassword,
+      role: role || 'user',
+      is_active: false,
+      created_at: new Date().toISOString().split('T')[0],
+      cgu_accepted_at: new Date().toISOString().split('T')[0]
     };
+
 
     this.users.push(newUser);
     // Sauvegarder la liste mise à jour des utilisateurs dans localStorage
@@ -154,11 +179,11 @@ export class AuthService {
   }
 
   getAuthHeaders(): { [header: string]: string } {
-  const token = localStorage.getItem('token'); // ou sessionStorage selon ton app
-  return {
-    'Authorization': `Bearer ${token}`,
-    'Content-Type': 'application/json'
-  };
-}
+    const token = localStorage.getItem('token'); // ou sessionStorage selon ton app
+    return {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    };
+  }
 
 }

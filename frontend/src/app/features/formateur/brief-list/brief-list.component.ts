@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 
 import { Brief } from '../../../core/services/models/brief.model'; // Ajusté pour pointer vers models
-import { Group } from '../../../core/services/models/group.model'; // Ajusté pour pointer vers models
+import { Promo} from '../../../core/services/models/promo.model';
 
 import { BriefService } from '../../../core/services/brief.service';
 import { PromoService } from '../../../core/services/promo.service';
@@ -23,9 +23,9 @@ import { HttpClient } from '@angular/common/http';
 })
 export class BriefListComponent implements OnInit {
   briefs$: Observable<Brief[]>;
-  promos$: Observable<Group[]>;
+  promos$: Observable<Promo[]>;
 
-  private allPromos: Group[] = [];
+  private allPromos: Promo[] = [];
   isCreateBriefModalOpen: boolean = false;
 
   currentBriefData: {
@@ -74,7 +74,7 @@ export class BriefListComponent implements OnInit {
   ) {
     this.briefs$ = this.briefService.briefs$;
     this.promos$ = this.promoService.promos$.pipe(
-      tap((promos: Group[]) => {
+      tap((promos: Promo[]) => {
         this.allPromos = promos;
         console.log(
           'Promos stockées localement dans BriefListComponent:',

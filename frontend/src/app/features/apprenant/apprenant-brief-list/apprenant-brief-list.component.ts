@@ -1,4 +1,3 @@
-// src/app/features/apprenant/apprenant-brief-list/apprenant-brief-list.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
@@ -8,9 +7,8 @@ import { AuthService } from '../../../core/services/auth.service';
 import { BriefService } from '../../../core/services/brief.service';
 import { PromoService } from '../../../core/services/promo.service';
 import { User } from '../../../core/services/models/user.model';
-import { Brief } from '../../../core/services/models/brief.model'; // Assure-toi que ce modèle contient tous les champs que tu veux afficher
-import { Group as Promo } from '../../../core/services/models/group.model';
-
+import { Brief } from '../../../core/services/models/brief.model';
+import { Promo } from '../../../core/services/models/promo.model';
 
 @Component({
   selector: 'app-apprenant-brief-list',
@@ -25,87 +23,58 @@ export class ApprenantBriefListComponent implements OnInit, OnDestroy {
   isLoading: boolean = true;
   errorMessage: string | null = null;
 
-  private promosMap: Map<string, string> = new Map();
-  private subscriptions: Subscription = new Subscription();
+  private readonly subscriptions: Subscription = new Subscription();
 
-  // --- NOUVELLES PROPRIÉTÉS POUR LA MODALE DE DÉTAIL DU BRIEF ---
+  // MODALE de DÉTAIL
   isBriefDetailModalOpen: boolean = false;
   selectedBriefForModal: Brief | null = null;
-  // --------------------------------------------------------------
 
   constructor(
-    private authService: AuthService,
-    private briefService: BriefService,
-    private promoService: PromoService
+    private readonly authService: AuthService,
+    private readonly briefService: BriefService,
+    private readonly promoService: PromoService
   ) {}
 
   ngOnInit(): void {
     this.currentUser = this.authService.currentUserValue;
-    this.isLoading = true;
-    const promoSub = this.promoService.getAllPromos().subscribe({
-      next: (promos: Promo[]) => {
-        promos.forEach(promo => {
-          if (promo.id && promo.name) {
-            this.promosMap.set(promo.id.toString(), promo.name);
-          }
-        });
-        this.checkUserAndLoadBriefs();
-      },
-      error: (err: any) => {
-        console.error("Erreur lors du chargement des promos:", err);
-        this.errorMessage = "Impossible de charger les informations des promotions.";
-        this.isLoading = false;
-      }
-    });
-    this.subscriptions.add(promoSub);
-  }
 
-  private checkUserAndLoadBriefs(): void {
-    if (this.currentUser && this.currentUser.role === 'apprenant' && this.currentUser.promoId) {
-      this.loadBriefsForApprenant(this.currentUser.promoId);
-    } else {
-      this.isLoading = false;
-      if (!this.currentUser?.promoId && this.currentUser?.role === 'apprenant') {
-        this.errorMessage = "Impossible de charger les briefs : informations de promotion manquantes.";
-      } else {
-        this.errorMessage = "Accès non autorisé ou informations utilisateur incomplètes.";
-      }
+    if (this.currentUser?.email) {
+      this.subscriptions.add(
+        this.promoService.promos$.subscribe((promos: Promo[]) => {
+          const matchedPromo = promos.find(promo =>
+            promo.members?.some(member => member.email === this.currentUser?.email)
+          );
+
+          if (matchedPromo) {
+            this.briefService.getBriefsByPromoId(String(matchedPromo.id)).subscribe({
+              next: (briefs) => {
+                this.apprenantBriefs = briefs;
+                this.isLoading = false;
+              },
+              error: (err) => {
+                console.error('Erreur lors du chargement des briefs :', err);
+                this.errorMessage = 'Erreur lors du chargement des briefs.';
+                this.isLoading = false;
+              }
+            });
+          } else {
+            this.errorMessage = "Aucune promo trouvée pour l'utilisateur.";
+            this.isLoading = false;
+          }
+        })
+      );
     }
   }
 
-  loadBriefsForApprenant(promoId: string): void {
-    this.errorMessage = null;
-    const briefsSub = this.briefService.getBriefsByPromoId(promoId).subscribe({
-      next: (briefsForPromo: Brief[]) => {
-        this.apprenantBriefs = briefsForPromo;
-        this.isLoading = false;
-      },
-      error: (err: any) => {
-        console.error("Erreur lors du chargement des briefs pour l'apprenant:", err);
-        this.errorMessage = "Une erreur est survenue lors du chargement de vos briefs.";
-        this.isLoading = false;
-      }
-    });
-    this.subscriptions.add(briefsSub);
-  }
-
-  getPromoName(promoId: string | number | undefined): string | undefined {
-    if (promoId === undefined) return 'Promo non spécifiée';
-    return this.promosMap.get(promoId.toString()) || `Promo ID: ${promoId}`;
-  }
-
-  // --- NOUVELLES MÉTHODES POUR GÉRER LA MODALE DE DÉTAIL DU BRIEF ---
-  openBriefDetailModal(brief: Brief): void {
+  openBriefDetail(brief: Brief): void {
     this.selectedBriefForModal = brief;
     this.isBriefDetailModalOpen = true;
-    console.log('Ouverture modale pour brief:', brief.title);
   }
 
-  closeBriefDetailModal(): void {
-    this.isBriefDetailModalOpen = false;
+  closeBriefDetail(): void {
     this.selectedBriefForModal = null;
+    this.isBriefDetailModalOpen = false;
   }
-  // --------------------------------------------------------------------
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();

@@ -7,7 +7,7 @@ const { verifyToken } = require("../middlewares/auth");
 router.post("/", verifyToken, BriefController.createBrief);
 
 // 📚 Voir tous les briefs créés par le formateur connecté
-router.get("/me", verifyToken, BriefController.getBriefsByMe);
+router.get("/promo/:id", verifyToken, BriefController.getBriefsByPromo);
 
 // 🔗 Assigner un groupe à un brief
 router.post("/assign", verifyToken, BriefController.assignBriefToGroup);

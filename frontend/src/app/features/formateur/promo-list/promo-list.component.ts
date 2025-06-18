@@ -1,36 +1,13 @@
-// src/app/features/formateur/promo-list/promo-list.component.ts
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router'; // Pour routerLink si besoin
-import { FormsModule } from '@angular/forms';   // Pour [(ngModel)]
+import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 
-import { Group } from '../../../core/services/models/group.model';   
+import { Promo } from '../../../core/services/models/promo.model';
 import { Person } from '../../../core/services/models/person.model';
 import { PromoService } from '../../../core/services/promo.service';
 import { ListService } from '../../../core/services/list.service';
-
-const ALL_SYSTEM_PEOPLE: Person[] = [
-  { id: 'p1', nom: 'Alice Lemaire (Poney/Chaton)', email: 'alice@mail.com', genre: 'feminin', aisanceFrancais: 4, ancienDWWM: true, niveauTechnique: 3, profil: 'alaise', age: 28 },
-  { id: 'p2', nom: 'Bob Martin (Poney)', email: 'bob@mail.com', genre: 'masculin', aisanceFrancais: 3, ancienDWWM: false, niveauTechnique: 2, profil: 'reserve', age: 22 },
-  { id: 'p3', nom: 'Charlie Durand (Marmotte)', email: 'charlie@mail.com', genre: 'nsp', aisanceFrancais: 4, ancienDWWM: true, niveauTechnique: 4, profil: 'timide', age: 30 },
-  { id: 'p4', nom: 'Diana Pires (Marmotte/Chaton)', email: 'diana@mail.com', genre: 'feminin', aisanceFrancais: 2, ancienDWWM: false, niveauTechnique: 1, profil: 'alaise', age: 25 },
-  { id: 'p5', nom: 'Émile Petit (Marmotte)', email: 'emile@mail.com', genre: 'masculin', aisanceFrancais: 3, ancienDWWM: true, niveauTechnique: 2, profil: 'reserve', age: 27 },
-  { id: 'p6', nom: 'Fiona Guyot (Poney/Chaton)', email: 'fiona@mail.com', genre: 'feminin', aisanceFrancais: 4, ancienDWWM: false, niveauTechnique: 3, profil: 'alaise', age: 24 },
-  { id: 'p7', nom: 'Gaspard Roux', email: 'gaspard@mail.com', genre: 'masculin', aisanceFrancais: 2, ancienDWWM: false, niveauTechnique: 1, profil: 'timide', age: 29 },
-  { id: 'p8', nom: 'Hélène Claire', email: 'helene@mail.com', genre: 'feminin', aisanceFrancais: 3, ancienDWWM: true, niveauTechnique: 3, profil: 'reserve', age: 26 },
-  {
-    id: 'p-apprenant-test',
-    nom: 'Apprenant Test User',
-    email: 'apprenant@test.com',
-    genre: 'nsp',
-    aisanceFrancais: 3,
-    ancienDWWM: false,
-    niveauTechnique: 2,
-    profil: 'reserve',
-    age: 25
-  }
-];
 
 @Component({
   selector: 'app-promo-list',
@@ -40,37 +17,36 @@ const ALL_SYSTEM_PEOPLE: Person[] = [
   styleUrls: ['./promo-list.component.css']
 })
 export class PromoListComponent implements OnInit, OnDestroy {
-  promos: Group[] = [];
+  promos: Promo[] = [];
   private promosSubscription?: Subscription;
 
-  lists: any[] = []; // Pour stocker les listes récupérées du backend
+  lists: any[] = [];
 
   isCreateOrEditModalOpen = false;
   isEditMode = false;
-  currentPromoData!: { id?: string | number; name: string; imageUrl?: string; members: Person[] };
+  currentPromoData!: { id?: string | number; nom: string; imageUrl?: string; members: Person[] };
 
-  allAvailablePeopleForSelection: Person[] = [...ALL_SYSTEM_PEOPLE];
+  newPersonName: string = '';
+  newPersonEmail: string = '';
   newPersonInput = '';
+  allAvailablePeopleForSelection: Person[] = [];
+
   formError: string | null = null;
   formSuccess: string | null = null;
 
   isConfirmDeleteModalOpen = false;
-  promoToDelete: Group | null = null;
+  promoToDelete: Promo | null = null;
 
   isPromoMembersModalOpen = false;
-  selectedPromoForMembers: Group | null = null;
+  selectedPromoForMembers: Promo | null = null;
 
-  newPersonName: string = '';
-newPersonEmail: string = '';
-
-  
   constructor(
     private readonly promoService: PromoService,
     private readonly listService: ListService
   ) {}
 
   ngOnInit(): void {
-    this.promosSubscription = this.promoService.promos$.subscribe(data => {
+    this.promosSubscription = this.promoService.getAllPromos().subscribe(data => {
       this.promos = data;
     });
 
@@ -81,7 +57,6 @@ newPersonEmail: string = '';
     this.listService.getAllLists().subscribe({
       next: data => {
         this.lists = data;
-        console.log('Listes chargées:', this.lists);
       },
       error: err => {
         console.error('Erreur chargement listes:', err);
@@ -92,7 +67,7 @@ newPersonEmail: string = '';
   openCreatePromoModal(): void {
     this.isEditMode = false;
     this.currentPromoData = {
-      name: '',
+      nom: '',
       imageUrl: '',
       members: []
     };
@@ -102,7 +77,7 @@ newPersonEmail: string = '';
     this.isCreateOrEditModalOpen = true;
   }
 
-  openEditPromoModal(promoToEdit: Group): void {
+  openEditPromoModal(promoToEdit: Promo): void {
     this.isEditMode = true;
     this.currentPromoData = JSON.parse(JSON.stringify(promoToEdit));
     this.formError = null;
@@ -120,34 +95,37 @@ newPersonEmail: string = '';
     this.formError = null;
     this.formSuccess = null;
 
-    if (!this.currentPromoData.name.trim()) {
+    if (!this.currentPromoData.nom.trim()) {
       this.formError = "Le nom de la promo est obligatoire.";
       return;
     }
 
-    if (this.isEditMode && this.currentPromoData.id) {
-      const promoToUpdate: Group = {
-        id: this.currentPromoData.id,
-        name: this.currentPromoData.name.trim(),
-        members: this.currentPromoData.members.map(m => ({ ...m })),
-        imageUrl: this.currentPromoData.imageUrl?.trim() ?? undefined
-      };
-      this.promoService.updatePromo(promoToUpdate);
-      this.formSuccess = `Promo "${promoToUpdate.name}" modifiée avec succès.`;
-    } else {
-      const newPromoPayload: Omit<Group, 'id'> = {
-        name: this.currentPromoData.name.trim(),
-        members: this.currentPromoData.members.map(m => ({ ...m })),
-        imageUrl: this.currentPromoData.imageUrl?.trim() ?? undefined
-      };
-      const createdPromo = this.promoService.addPromo(newPromoPayload);
-      this.formSuccess = `Promo "${createdPromo.name}" créée avec succès.`;
-    }
+    const promoPayload: Omit<Promo, 'id'> = {
+      nom: this.currentPromoData.nom.trim(),
+      members: this.currentPromoData.members.map(m => ({ ...m })),
+      imageUrl: this.currentPromoData.imageUrl?.trim() ?? undefined,
+      formateurName: 'Formateur Test' // Peut être dynamique plus tard
+    };
 
-    setTimeout(() => {
-      this.closeCreateOrEditModal();
-      this.formSuccess = null;
-    }, 1500);
+    if (this.isEditMode && this.currentPromoData.id) {
+      this.promoService.updatePromo(this.currentPromoData.id, promoPayload).subscribe(() => {
+        this.refreshPromos();
+        this.formSuccess = `Promo "${promoPayload.nom}" modifiée avec succès.`;
+        setTimeout(() => this.closeCreateOrEditModal(), 1500);
+      });
+    } else {
+      this.promoService.createPromo(promoPayload).subscribe(() => {
+        this.refreshPromos();
+        this.formSuccess = `Promo "${promoPayload.nom}" créée avec succès.`;
+        setTimeout(() => this.closeCreateOrEditModal(), 1500);
+      });
+    }
+  }
+
+  refreshPromos(): void {
+    this.promoService.getAllPromos().subscribe(data => {
+      this.promos = data;
+    });
   }
 
   removePersonFromCurrentPromo(personToRemove: Person): void {
@@ -163,33 +141,51 @@ newPersonEmail: string = '';
     this.newPersonInput = '';
   }
 
-addPersonFromInput() {
-  console.log("Tentative d'ajout :", this.newPersonInput);
+  addPersonFromInput(): void {
+    const person = this.allAvailablePeopleForSelection.find(
+      p => p.nom.toLowerCase().includes(this.newPersonInput.toLowerCase()) ||
+           p.email?.toLowerCase().includes(this.newPersonInput.toLowerCase())
+    );
 
-  const person = this.getAvailablePeopleForSelection().find(
-    p => p.nom.toLowerCase().includes(this.newPersonInput.toLowerCase()) ||
-         p.email?.toLowerCase().includes(this.newPersonInput.toLowerCase())
-  );
-
-  if (person) {
-    this.addPersonToCurrentPromo(person);
-    this.newPersonInput = '';
-  } else {
-    console.warn("Aucune personne trouvée pour :", this.newPersonInput);
-    this.formError = 'Aucune personne trouvée avec ce nom ou email';
+    if (person) {
+      this.addPersonToCurrentPromo(person);
+      this.newPersonInput = '';
+    } else {
+      this.formError = 'Aucune personne trouvée avec ce nom ou email';
+    }
   }
-}
-
 
   getAvailablePeopleForSelection(): Person[] {
-    if (!this.currentPromoData?.members) {
-      return [...this.allAvailablePeopleForSelection];
-    }
-    const currentMemberIds = new Set(this.currentPromoData.members.map(m => m.id));
-    return this.allAvailablePeopleForSelection.filter(p => !currentMemberIds.has(p.id));
+    if (!this.currentPromoData?.members) return this.allAvailablePeopleForSelection;
+    const currentIds = new Set(this.currentPromoData.members.map(m => m.id));
+    return this.allAvailablePeopleForSelection.filter(p => !currentIds.has(p.id));
   }
 
-  openPromoMembersModal(promo: Group): void {
+  createAndAddPerson(): void {
+    if (!this.newPersonName || !this.newPersonEmail) {
+      this.formError = "Nom et email requis.";
+      return;
+    }
+
+    const newPerson: Person = {
+      id: Date.now().toString(),
+      nom: this.newPersonName,
+      email: this.newPersonEmail,
+      genre: 'nsp',
+      aisanceFrancais: 1,
+      ancienDWWM: false,
+      niveauTechnique: 1,
+      profil: '',
+      age: 0
+    };
+
+    this.currentPromoData.members.push(newPerson);
+    this.newPersonName = '';
+    this.newPersonEmail = '';
+    this.formError = '';
+  }
+
+  openPromoMembersModal(promo: Promo): void {
     this.selectedPromoForMembers = promo;
     this.isPromoMembersModalOpen = true;
   }
@@ -199,7 +195,7 @@ addPersonFromInput() {
     this.selectedPromoForMembers = null;
   }
 
-  openConfirmDeletePromoModal(promo: Group): void {
+  openConfirmDeletePromoModal(promo: Promo): void {
     this.promoToDelete = promo;
     this.isConfirmDeleteModalOpen = true;
   }
@@ -211,40 +207,14 @@ addPersonFromInput() {
 
   confirmDeletePromo(): void {
     if (this.promoToDelete?.id) {
-      this.promoService.deletePromo(this.promoToDelete.id);
-      this.closeConfirmDeletePromoModal();
+      this.promoService.deletePromo(this.promoToDelete.id).subscribe(() => {
+        this.refreshPromos();
+        this.closeConfirmDeletePromoModal();
+      });
     }
   }
 
   ngOnDestroy(): void {
     this.promosSubscription?.unsubscribe();
   }
-
-  createAndAddPerson() {
-  if (!this.newPersonName || !this.newPersonEmail) {
-    this.formError = "Nom et email requis.";
-    return;
-  }
-
-  const newPerson: Person = {
-    id: Date.now().toString(), // 🔑 ID généré automatiquement
-    nom: this.newPersonName,
-    email: this.newPersonEmail,
-    genre: 'nsp', // ou '' selon ton besoin
-    aisanceFrancais: 1, // ou 0 si tu autorises
-    ancienDWWM: false,
-    niveauTechnique: 1, // ou 0
-    profil: '',
-    age: 0
-  };
-
-  this.currentPromoData.members.push(newPerson);
-
-  // Réinitialise les champs
-  this.newPersonName = '';
-  this.newPersonEmail = '';
-  this.formError = '';
-}
-
-
 }

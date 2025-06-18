@@ -69,7 +69,7 @@ closeBriefModal(): void {
 
     if (this.currentUser && this.currentUser.role === 'apprenant' && this.currentUser.promoId) {
       console.log(`ApprenantGroupeList: Initialisation pour l'utilisateur ID ${this.currentUser.id} et promoId ${this.currentUser.promoId}`);
-      this.loadUserGroups(this.currentUser.id, this.currentUser.promoId);
+      this.loadUserGroups(this.currentUser.id, this.currentUser.promoId!);
     } else {
       console.error("ApprenantGroupeList: currentUser, rôle, ou promoId manquant.", this.currentUser);
       this.errorMessage = "Informations utilisateur ou de promotion manquantes pour afficher vos groupes.";
@@ -93,17 +93,17 @@ closeBriefModal(): void {
           if (brief.groups && Array.isArray(brief.groups) && brief.groups.length > 0) {
             console.log(`ApprenantGroupeList - Brief "${brief.title}" a ${brief.groups.length} sous-groupe(s).`);
             brief.groups.forEach(workGroup => {
-              console.log(`ApprenantGroupeList --- Vérification du sous-groupe "${workGroup.name}" (ID: ${workGroup.id}) avec ${workGroup.members.length} membre(s)`);
+              console.log(`ApprenantGroupeList --- Vérification du sous-groupe "${workGroup.nom}" (ID: ${workGroup.id}) avec ${workGroup.members.length} membre(s)`);
               // Vérifier si l'apprenant actuel est membre de ce sous-groupe
               const isMember = workGroup.members.some(member => member.id === userId);
-              console.log(`ApprenantGroupeList --- L'utilisateur ${userId} est membre de "${workGroup.name}" ? ${isMember}`);
+              console.log(`ApprenantGroupeList --- L'utilisateur ${userId} est membre de "${workGroup.nom}" ? ${isMember}`);
               if (isMember) {
                 groupsList.push({
                   briefId: brief.id,
                   briefTitle: brief.title,
                   briefImageUrl: brief.imageUrl,
                   groupId: workGroup.id,
-                  groupName: workGroup.name,
+                  groupName: workGroup.nom,
                   groupMembers: this.getGroupMembersExcludingUser(workGroup.members, userId)
                 });
               }

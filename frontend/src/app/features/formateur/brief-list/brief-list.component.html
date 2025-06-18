@@ -25,7 +25,7 @@
                   <select [(ngModel)]="selectedGroupId">
                     <option [ngValue]="null" disabled>-- Choisir une promo --</option>
                     @for (promo of resolvedPromos; track promo.id) {
-                      <option [value]="promo.id">{{ promo.name }}</option>
+                      <option [value]="promo.id">{{ promo.nom}}</option>
                     }
                   </select>
                   <button type="button" (click)="assignGroupToBrief()">Valider</button>
@@ -108,7 +108,7 @@
                     [(ngModel)]="currentBriefData.sourceGroupId" required>
               <option [ngValue]="null" disabled>-- Choisir une promo --</option>
               @for (promo of resolvedPromos; track promo.id) {
-                <option [value]="promo.id">{{ promo.name }}</option>
+                <option [value]="promo.id">{{ promo.nom}}</option>
               }
             </select>
           } @else {

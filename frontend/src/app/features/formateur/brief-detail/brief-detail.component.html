@@ -6,7 +6,7 @@
     <p class="brief-detail-description">{{ data.brief.description }}</p>
      <p class="brief-promo-info">
       <em>Promo associée :
-        <strong>{{ data.sourceGroup.name }}</strong>
+        <strong>{{ data.sourceGroup.nom }}</strong>
         @if (data.sourceGroup.members) {
           ({{ data.sourceGroup.members.length }} personnes)
         }
@@ -23,7 +23,7 @@
       @for (group of generatedWorkGroups; let i = $index; track i) {
         <div class="work-group-card" [class.highlight-drop-zone]="hoveredGroupId === group.id">
           <div class="work-group-header">
-            <h4 class="work-group-name">{{ group.name }}</h4>
+            <h4 class="work-group-name">{{ group.nom }}</h4>
             <div class="work-group-actions">
               <!-- Boutons d’action (optionnels) -->
             </div>
@@ -32,7 +32,7 @@
           <ul class="work-group-members-list"
               cdkDropList
               [id]="'group-' + group.id"
-              [cdkDropListData]="group.members"
+              [cdkDropListData]="group.members ?? []"
               [cdkDropListConnectedTo]="connectedDropListIds"
               (cdkDropListDropped)="dropMember($event, group.id.toString())"
               (cdkDropListEntered)="onDragEntered(group.id.toString())"
@@ -47,7 +47,7 @@
               </li>
             }
 
-            @if (group.members.length === 0) {
+            @if ((group.members?.length ?? 0) === 0) {
               <li class="no-members-in-card-drag-placeholder">Déposez des membres ici</li>
             }
           </ul>
@@ -118,8 +118,8 @@
         <div class="modal-header">
           <h2>Générer des Sous-Groupes pour "{{ data.brief.name }}"</h2>
           <p>À partir de la promo :
-            <strong>{{ data.sourceGroup.name }}</strong>
-            ({{ data.sourceGroup.members.length || 0 }} personnes)
+            <strong>{{ data.sourceGroup.nom }}</strong>
+            ({{ data.sourceGroup.members?.length || 0 }} personnes)
           </p>
         </div>
         <form class="modal-form" (ngSubmit)="onGenerateGroupsSubmit()">
@@ -127,7 +127,7 @@
             <label for="gen-people-per-group">Nombre de personnes par sous-groupe :</label>
             <input type="number" id="gen-people-per-group" name="genPeoplePerGroup"
                    [(ngModel)]="generationCriteria.peoplePerGroup"
-                   min="1" [max]="data.sourceGroup.members.length || 1" required>
+                   min="1" [max]="data.sourceGroup.members?.length || 1" required>
           </div>
           <h4 class="criteria-title">Critères de Mixité :</h4>
           <div class="form-group checkbox-group">

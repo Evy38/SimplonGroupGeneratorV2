@@ -11,12 +11,12 @@ import { BriefListComponent } from './brief-list.component';
 import { BriefService } from '../../../core/services/brief.service';
 import { PromoService } from '../../../core/services/promo.service';
 import { Brief } from '../../../core/services/models/brief.model'; // Correction du chemin si nécessaire
-import { Group } from '../../../core/services/models/group.model'; // Correction du chemin si nécessaire
+import { Promo} from '../../../core/services/models/promo.model'; // Correction du chemin si nécessaire
 import { ActivatedRoute } from '@angular/router';
 
 // Utilisation de Subjects pour contrôler les émissions des observables des services
 const mockBriefsSubject = new Subject<Brief[]>();
-const mockPromosSubject = new Subject<Group[]>();
+const mockPromosSubject = new Subject<Promo[]>();
 
 // Variable pour stocker la dernière valeur des briefs pour les mocks
 // On la définit ici pour qu'elle soit accessible dans la portée de la classe MockBriefService
@@ -100,7 +100,7 @@ describe('BriefListComponent', () => {
       creationDate: new Date(),
     },
   ];
-  const initialMockPromosData: Group[] = [
+  const initialMockPromosData: Promo[] = [
     { id: 'p1', name: 'Promo Test Alpha', members: [] },
     { id: 'p2', name: 'Promo Test Beta', members: [] },
   ];

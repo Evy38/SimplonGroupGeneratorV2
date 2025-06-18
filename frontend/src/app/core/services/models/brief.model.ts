@@ -1,5 +1,5 @@
 // src/app/core/services/models/brief.model.ts
-import { Group } from './group.model'; // Assure-toi que Group est bien l'interface pour les sous-groupes de travail
+import { Promo} from './promo.model'; // Assure-toi que Group est bien l'interface pour les sous-groupes de travail
 
 export interface Brief {
   id: string;
@@ -11,5 +11,5 @@ export interface Brief {
   imageUrl?: string;
   sourceGroupId: string | number; // ID de la Promo d'où proviennent les membres pour former les groupes
   assignedGroupId?: string | number | null; // Si un brief entier est assigné à UN groupe spécifique (moins courant pour les sous-groupes)
-  groups?: Group[];        // Tableau des sous-groupes de travail générés pour CE brief
+  groups?: Promo[];        // Tableau des sous-groupes de travail générés pour CE brief
 }

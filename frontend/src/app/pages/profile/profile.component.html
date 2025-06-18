@@ -1,13 +1,14 @@
 <div class="profile-container">
-  <h2>Mon Profil</h2> <div class="back-to-dashboard-container">
-  <button class="button-primary" (click)="navigateToDashboard()">⬅️ Retour au Dashboard</button>
-</div>
+  <h2>Mon Profil</h2>
 
+  <div class="back-to-dashboard-container">
+    <button class="button-primary" (click)="navigateToDashboard()">⬅️ Retour au Dashboard</button>
+  </div>
 
   @if (currentUser) {
     <div class="profile-section">
       <h3>Informations Personnelles</h3>
-      <p><strong>Nom :</strong> {{ currentUser.name }}</p>
+      <p><strong>Nom :</strong> {{ currentUser.firstname }} {{ currentUser.lastname }}</p>
       <p><strong>Email :</strong> {{ currentUser.email }}</p>
       <p><strong>Rôle :</strong> {{ currentUser.role }}</p>
 
@@ -15,7 +16,6 @@
         <h4>Détails supplémentaires :</h4>
         <p><strong>Genre :</strong> {{ personDetails.genre }}</p>
         <p><strong>Âge :</strong> {{ personDetails.age }}</p>
-        <!-- Ajoutez d'autres champs de personDetails ici si pertinent -->
       }
     </div>
 
@@ -35,6 +35,7 @@
             <label for="currentPassword">Mot de passe actuel (simulation) :</label>
             <input type="password" id="currentPassword" name="currentPassword" [(ngModel)]="currentPassword" required>
           </div>
+
           <div class="form-group">
             <label for="newPassword">Nouveau mot de passe :</label>
             <div class="password-input-group">
@@ -44,18 +45,21 @@
               </button>
             </div>
           </div>
+
           <div class="form-group">
             <label for="confirmNewPassword">Confirmer le nouveau mot de passe :</label>
             <input [type]="passwordFieldType" id="confirmNewPassword" name="confirmNewPassword" [(ngModel)]="confirmNewPassword" required>
           </div>
+
           @if (passwordChangeMessage) {
             <p class="message" [class.success]="passwordChangeMessage.includes('succès')" [class.error]="!passwordChangeMessage.includes('succès')">
               {{ passwordChangeMessage }}
             </p>
           }
+
           <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Enregistrer le mot de passe</button>
-            <button type="button" (click)="togglePasswordForm()" class="btn btn-cancel">Annuler</button>
+            <button type="submit" class="btn btn-primary">Enregistrer</button>
+            <button type="button" class="btn btn-cancel" (click)="togglePasswordForm()">Annuler</button>
           </div>
         </form>
       }
@@ -67,26 +71,8 @@
         <ul>
           @for (promo of userPromos; track promo.id) {
             <li>
-              {{ promo.name }}
-
-            </li>
-          }
-        </ul>
-      } @else {
-        <p>Vous n'êtes assigné(e) à aucune promo pour le moment.</p>
-      }
-    </div>
-
-  
-
-  <div class="profile-section">
-      <h3>Mes Promos</h3>
-      @if (userPromos.length > 0) {
-        <ul>
-          @for (promo of userPromos; track promo.id) {
-            <li>
-              <strong>{{ promo.name }}</strong>
-              @if (promo.formateurName) { <!-- Vérifie si formateurName existe -->
+              <strong>{{ promo.nom }}</strong>
+              @if (promo.formateurName) {
                 <p class="formateur-info">Formateur assigné : <strong>{{ promo.formateurName }}</strong></p>
               } @else {
                 <p class="formateur-info">Aucun formateur principal assigné à cette promo.</p>
@@ -98,10 +84,7 @@
         <p>Vous n'êtes assigné(e) à aucune promo pour le moment.</p>
       }
     </div>
-
-    } @else {
+  } @else {
     <p>Chargement des informations du profil...</p>
   }
-
 </div>
-

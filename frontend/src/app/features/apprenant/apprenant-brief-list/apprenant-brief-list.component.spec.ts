@@ -6,7 +6,7 @@ import { PromoService } from '../../../core/services/promo.service';
 import { of, throwError } from 'rxjs';
 import { UserRole, User } from '../../../core/services/models/user.model';
 import { Brief } from '../../../core/services/models/brief.model';
-import { Group } from '../../../core/services/models/group.model';
+import { Promo } from '../../../core/services/models/promo.model';
 
 describe('ApprenantBriefListComponent', () => {
   let component: ApprenantBriefListComponent;

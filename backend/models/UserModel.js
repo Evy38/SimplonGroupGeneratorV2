@@ -14,26 +14,26 @@ const UserModel = {
       VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `;
     const params = [
-      user.nom,
-      user.prenom,
+      user.firstname,
+      user.lastname,
       user.email,
-      user.mot_de_passe,
+      user.password,
       user.role || "user",
-      user.actif || false,
-      user.date_creation,
-      user.date_acceptation_cgu
+      user.is_active || false,
+      user.created_at,
+      user.cgu_accepted_at
     ];
     db.query(sql, params, callback);
   },
 
   // 📧 Recherche un utilisateur par son email
-findByEmail: (email, callback) => {
-  const sql = "SELECT * FROM users WHERE email = ?";
-  db.query(sql, [email], (err, results) => {
-    if (err || results.length === 0) return callback(err || new Error("Utilisateur non trouvé"), null);
-    callback(null, results[0]);
-  });
-},
+  findByEmail: (email, callback) => {
+    const sql = "SELECT * FROM users WHERE email = ?";
+    db.query(sql, [email], (err, results) => {
+      if (err || results.length === 0) return callback(err || new Error("Utilisateur non trouvé"), null);
+      callback(null, results[0]);
+    });
+  },
 
 
   // ✅ Active un compte après confirmation par mail

@@ -2,41 +2,41 @@ const db = require("../config/db");
 
 const BriefModel = {
   // ➕ Créer un brief
-  create: async (titre, description, formateur_id) => {
+  create: async (title, description, imageUrl, promo_id) => {
     const sql = `
-      INSERT INTO briefs (titre, description, formateur_id)
-      VALUES (?, ?, ?)
+      INSERT INTO briefs (title, description, imageUrl, promo_id, creationDate)
+      VALUES (?, ?, ?, ?, NOW())
     `;
-    const [result] = await db.query(sql, [titre, description, formateur_id]);
+    const [result] = await db.query(sql, [title, description, imageUrl, promo_id]);
     return result.insertId;
   },
 
-  // 📋 Récupérer tous les briefs d’un formateur
-  getByFormateur: async (formateur_id) => {
+  // 📋 Récupérer tous les briefs d’une promo
+  getByPromo: async (promo_id) => {
     const sql = `
       SELECT * FROM briefs
-      WHERE formateur_id = ?
-      ORDER BY created_at DESC
+      WHERE promo_id = ?
+      ORDER BY creationDate DESC
     `;
-    const [rows] = await db.query(sql, [formateur_id]);
+    const [rows] = await db.query(sql, [promo_id]);
     return rows;
   },
 
-  // 🔄 Assigner un brief à un groupe
+  // 🔄 Assigner un brief à un groupe (optionnel si tu fais ce lien ailleurs)
   assignToGroup: async (brief_id, group_id) => {
     const sql = `
-      INSERT INTO brief_groups (brief_id, group_id)
-      VALUES (?, ?)
+      UPDATE groups
+      SET brief_id = ?
+      WHERE id = ?
     `;
     await db.query(sql, [brief_id, group_id]);
   },
 
-  // 📂 Récupérer les groupes assignés à un brief
+  // 📂 Récupérer les groupes associés à un brief
   getAssignedGroups: async (brief_id) => {
     const sql = `
-      SELECT g.* FROM groups g
-      JOIN brief_groups bg ON g.id = bg.group_id
-      WHERE bg.brief_id = ?
+      SELECT * FROM groups
+      WHERE brief_id = ?
     `;
     const [rows] = await db.query(sql, [brief_id]);
     return rows;
