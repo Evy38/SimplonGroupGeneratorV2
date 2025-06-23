@@ -15,4 +15,11 @@ router.put("/:id", verifyToken, isAdmin, PromoController.updatePromo);
 // ❌ Supprimer une promo
 router.delete("/:id", verifyToken, isAdmin, PromoController.deletePromo);
 
+//récuperer une promo seule
+router.get('/:id', PromoController.getPromoById);
+
+router.get('/:id/people', PromoController.getPeopleForPromo);
+
+
+
 module.exports = router;

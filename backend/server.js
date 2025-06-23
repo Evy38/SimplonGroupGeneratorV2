@@ -1,13 +1,13 @@
 const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
-require('dotenv').config();
-const cors = require('cors');
+require("dotenv").config();
+const cors = require("cors");
 
 // Base de données
 const db = require("./database");
 
-// Routes centralisées
+// Importation des routes centralisées
 const routes = require("./routes");
 
 // Middleware
@@ -18,7 +18,7 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// Point d’entrée de toutes les routes via /api
+// Toutes les routes passent par /api
 app.use("/api", routes);
 
 // Test simple
@@ -30,5 +30,3 @@ app.get("/", (req, res) => {
 app.listen(PORT, () => {
   console.log(`✅ Serveur démarré sur http://localhost:${PORT}`);
 });
-
-app.use("/api/promos", require("./routes/promo.routes"));

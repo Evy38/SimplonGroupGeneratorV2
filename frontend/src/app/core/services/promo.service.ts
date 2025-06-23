@@ -1,4 +1,3 @@
-// src/app/core/services/promo.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
@@ -10,49 +9,41 @@ import { Person } from '../../core/services/models/person.model';
 })
 export class PromoService {
   private readonly apiUrl = 'http://localhost:3000/api/promos';
-  private readonly promosSubject = new BehaviorSubject<Promo[]>([]);  // ✅ le sujet interne
-  public readonly promos$ = this.promosSubject.asObservable(); 
+
+  private readonly promosSubject = new BehaviorSubject<Promo[]>([]);
+  public readonly promos$ = this.promosSubject.asObservable();
+
   constructor(private readonly http: HttpClient) {
-     this.promosSubject.next([
-      {
-        id: 'demo-promo',
-        nom: 'Démo',
-        imageUrl: '',
-        formateurName: 'Formateur Démo',
-        members: []
-      }
-    ]);
+    // 🧼 Données simulées supprimées : on affichera uniquement ce qui vient de la BDD
   }
 
-  /** 🔁 Récupère toutes les promos depuis le backend */
+  /** 🔁 Récupère toutes les promos avec leur formateur */
   getAllPromos(): Observable<Promo[]> {
     return this.http.get<Promo[]>(this.apiUrl);
   }
 
-  /** 🔍 Récupère les membres d’une promo par son ID */
-  getMembersByPromoId(promoId: string | number): Observable<Person[]> {
-    return this.http.get<Person[]>(`${this.apiUrl}/${promoId}/people`);
-  }
-
-  /** 🔍 Récupère une promo spécifique */
-  getPromoById(id: string | number): Observable<Promo> {
+  /** 🔍 Récupère une promo spécifique par son ID */
+  getPromoById(id: number): Observable<Promo> {
     return this.http.get<Promo>(`${this.apiUrl}/${id}`);
   }
 
-  /** ➕ Crée une promo */
+  /** 👥 Récupère les personnes rattachées à une promo */
+  getPeopleForPromo(promoId: number): Observable<Person[]> {
+    return this.http.get<Person[]>(`${this.apiUrl}/${promoId}/people`);
+  }
+
+  /** ➕ Crée une nouvelle promo */
   createPromo(promoData: Omit<Promo, 'id'>): Observable<Promo> {
     return this.http.post<Promo>(this.apiUrl, promoData);
   }
 
-  /** ✏️ Met à jour une promo */
-  updatePromo(id: string | number, promoData: Partial<Promo>): Observable<Promo> {
+  /** ✏️ Met à jour une promo existante */
+  updatePromo(id: number, promoData: Partial<Promo>): Observable<Promo> {
     return this.http.put<Promo>(`${this.apiUrl}/${id}`, promoData);
   }
 
   /** ❌ Supprime une promo */
-  deletePromo(id: string | number): Observable<any> {
+  deletePromo(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/${id}`);
   }
-
-
 }

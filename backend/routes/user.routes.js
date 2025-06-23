@@ -1,12 +1,14 @@
 const express = require("express");
 const router = express.Router();
 const UserController = require("../controllers/UserController");
+
 const { verifyToken } = require("../middlewares/auth");
 const isAdmin = require("../middlewares/isAdmin");
 
 // Authentification publique
 router.post("/register", UserController.register);
 router.post("/login", UserController.login);
+
 router.get("/confirm", UserController.confirmEmail);
 
 // Routes protégées

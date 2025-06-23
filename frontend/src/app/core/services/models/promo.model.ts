@@ -1,11 +1,10 @@
-// src/app/core/services/models/promo.model.ts
-
 import { Person } from './person.model';
+import { User } from './user.model';
 
 export interface Promo {
-  id: string | number;
-  nom: string;                     // nom de la promo
-  formateurName?: string;         // nom du formateur (optionnel, string)
-  imageUrl?: string;              // image de la promo (optionnelle)
-  members?: Person[];             // liste des personnes dans la promo
+  id: number;
+  name: string;
+  imageUrl?: string;     // correspond à imageUrl (OK ✅)
+  formateur?: User;      // correspond à user_id (OK ✅ )
+  people?: Person[];     // correspond à toutes les personnes qui ont promo_id = cette promo
 }
