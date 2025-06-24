@@ -2,11 +2,10 @@
 import { Promo} from './promo.model'; // Assure-toi que Group est bien l'interface pour les sous-groupes de travail
 
 export interface Brief {
-  id: string;
+  id: number;
   name: string;           // Utilisé comme titre du brief
-  title: string;          // Peut être redondant ou un titre alternatif
   description: string;
-  promoId: string;        // ID de la Promo principale à laquelle le brief est lié
+  promoId: number;        // ID de la Promo principale à laquelle le brief est lié
   creationDate: Date;
   imageUrl?: string;
   sourceGroupId: string | number; // ID de la Promo d'où proviennent les membres pour former les groupes

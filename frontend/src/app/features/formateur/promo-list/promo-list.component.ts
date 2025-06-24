@@ -7,7 +7,7 @@ import { Subscription } from 'rxjs';
 import { Promo } from '../../../core/services/models/promo.model';
 import { Person } from '../../../core/services/models/person.model';
 import { PromoService } from '../../../core/services/promo.service';
-import { ListService } from '../../../core/services/list.service';
+import { PersonService } from '../../../core/services/person.service';
 
 @Component({
   selector: 'app-promo-list',
@@ -20,17 +20,13 @@ export class PromoListComponent implements OnInit, OnDestroy {
   promos: Promo[] = [];
   private promosSubscription?: Subscription;
 
-  lists: any[] = [];
+  allPeople: Person[] = [];
 
   isCreateOrEditModalOpen = false;
   isEditMode = false;
   currentPromoData!: { id?: string | number; nom: string; imageUrl?: string; members: Person[] };
 
-  newPersonName: string = '';
-  newPersonEmail: string = '';
-  newPersonInput = '';
-  allAvailablePeopleForSelection: Person[] = [];
-
+  newPersonId: number | null = null;
   formError: string | null = null;
   formSuccess: string | null = null;
 
@@ -42,25 +38,16 @@ export class PromoListComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly promoService: PromoService,
-    private readonly listService: ListService
+    private readonly personService: PersonService
   ) {}
 
   ngOnInit(): void {
-    this.promosSubscription = this.promoService.getAllPromos().subscribe(data => {
-      this.promos = data;
+    this.promosSubscription = this.promoService.getAllPromos().subscribe(promos => {
+      this.promos = promos;
     });
 
-    this.loadLists();
-  }
-
-  loadLists(): void {
-    this.listService.getAllLists().subscribe({
-      next: data => {
-        this.lists = data;
-      },
-      error: err => {
-        console.error('Erreur chargement listes:', err);
-      }
+    this.personService.getAllPeopleByList(0).subscribe(people => {
+      this.allPeople = people;
     });
   }
 
@@ -73,7 +60,7 @@ export class PromoListComponent implements OnInit, OnDestroy {
     };
     this.formError = null;
     this.formSuccess = null;
-    this.newPersonInput = '';
+    this.newPersonId = null;
     this.isCreateOrEditModalOpen = true;
   }
 
@@ -82,7 +69,7 @@ export class PromoListComponent implements OnInit, OnDestroy {
     this.currentPromoData = JSON.parse(JSON.stringify(promoToEdit));
     this.formError = null;
     this.formSuccess = null;
-    this.newPersonInput = '';
+    this.newPersonId = null;
     this.isCreateOrEditModalOpen = true;
   }
 
@@ -96,93 +83,52 @@ export class PromoListComponent implements OnInit, OnDestroy {
     this.formSuccess = null;
 
     if (!this.currentPromoData.nom.trim()) {
-      this.formError = "Le nom de la promo est obligatoire.";
+      this.formError = 'Le nom de la promo est obligatoire.';
       return;
     }
 
-    const promoPayload: Omit<Promo, 'id'> = {
-      nom: this.currentPromoData.nom.trim(),
-      members: this.currentPromoData.members.map(m => ({ ...m })),
+    const promoPayload = {
+      name: this.currentPromoData.nom.trim(),
+      members: this.currentPromoData.members,
       imageUrl: this.currentPromoData.imageUrl?.trim() ?? undefined,
-      formateurName: 'Formateur Test' // Peut être dynamique plus tard
+      formateurName: 'Formateur Test'
     };
 
     if (this.isEditMode && this.currentPromoData.id) {
-      this.promoService.updatePromo(this.currentPromoData.id, promoPayload).subscribe(() => {
+      const promoId = typeof this.currentPromoData.id === 'string' ? parseInt(this.currentPromoData.id, 10) : this.currentPromoData.id;
+      this.promoService.updatePromo(promoId, promoPayload).subscribe(() => {
         this.refreshPromos();
-        this.formSuccess = `Promo "${promoPayload.nom}" modifiée avec succès.`;
+        this.formSuccess = `Promo "${promoPayload.name}" modifiée avec succès.`;
         setTimeout(() => this.closeCreateOrEditModal(), 1500);
       });
     } else {
       this.promoService.createPromo(promoPayload).subscribe(() => {
         this.refreshPromos();
-        this.formSuccess = `Promo "${promoPayload.nom}" créée avec succès.`;
+        this.formSuccess = `Promo "${promoPayload.name}" créée avec succès.`;
         setTimeout(() => this.closeCreateOrEditModal(), 1500);
       });
     }
   }
 
   refreshPromos(): void {
-    this.promoService.getAllPromos().subscribe(data => {
-      this.promos = data;
+    this.promoService.getAllPromos().subscribe(promos => {
+      this.promos = promos;
     });
+  }
+
+  addPersonToCurrentPromoById(): void {
+    if (!this.newPersonId) return;
+    const person = this.allPeople.find(p => Number(p.id) === Number(this.newPersonId));
+    if (person && !this.currentPromoData.members.find(m => m.id === person.id)) {
+      this.currentPromoData.members.push(person);
+    }
+    this.newPersonId = null;
   }
 
   removePersonFromCurrentPromo(personToRemove: Person): void {
     if (this.currentPromoData) {
       this.currentPromoData.members = this.currentPromoData.members.filter(p => p.id !== personToRemove.id);
     }
-  }
-
-  addPersonToCurrentPromo(personToAdd: Person): void {
-    if (this.currentPromoData && !this.currentPromoData.members.find(m => m.id === personToAdd.id)) {
-      this.currentPromoData.members = [...this.currentPromoData.members, { ...personToAdd }];
-    }
-    this.newPersonInput = '';
-  }
-
-  addPersonFromInput(): void {
-    const person = this.allAvailablePeopleForSelection.find(
-      p => p.nom.toLowerCase().includes(this.newPersonInput.toLowerCase()) ||
-           p.email?.toLowerCase().includes(this.newPersonInput.toLowerCase())
-    );
-
-    if (person) {
-      this.addPersonToCurrentPromo(person);
-      this.newPersonInput = '';
-    } else {
-      this.formError = 'Aucune personne trouvée avec ce nom ou email';
-    }
-  }
-
-  getAvailablePeopleForSelection(): Person[] {
-    if (!this.currentPromoData?.members) return this.allAvailablePeopleForSelection;
-    const currentIds = new Set(this.currentPromoData.members.map(m => m.id));
-    return this.allAvailablePeopleForSelection.filter(p => !currentIds.has(p.id));
-  }
-
-  createAndAddPerson(): void {
-    if (!this.newPersonName || !this.newPersonEmail) {
-      this.formError = "Nom et email requis.";
-      return;
-    }
-
-    const newPerson: Person = {
-      id: Date.now().toString(),
-      nom: this.newPersonName,
-      email: this.newPersonEmail,
-      genre: 'nsp',
-      aisanceFrancais: 1,
-      ancienDWWM: false,
-      niveauTechnique: 1,
-      profil: '',
-      age: 0
-    };
-
-    this.currentPromoData.members.push(newPerson);
-    this.newPersonName = '';
-    this.newPersonEmail = '';
-    this.formError = '';
   }
 
   openPromoMembersModal(promo: Promo): void {

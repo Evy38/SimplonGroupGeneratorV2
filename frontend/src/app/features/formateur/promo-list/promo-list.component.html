@@ -3,32 +3,29 @@
   <h1>Mes Promos</h1>
 </header>
 
-<!-- PARTIE VISUELLE DES PROMOS -->
 <div class="promo-cards-container" [class.blurred]="isCreateOrEditModalOpen || isConfirmDeleteModalOpen">
   @for (promo of promos; let i = $index; track i) {
-    <div class="promo-card" (click)="openPromoMembersModal(promo)" (keydown.enter)="openPromoMembersModal(promo)" tabindex="0">
+    <div class="promo-card" (click)="openPromoMembersModal(promo)" (keydown.enter)="openPromoMembersModal(promo)">
       <div class="promo-card-image-link-wrapper">
         @if (promo.imageUrl) {
           <div class="promo-card-image">
-            <img [src]="promo.imageUrl" [alt]="promo.nom">
+            <img [src]="promo.imageUrl" [alt]="promo.name">
           </div>
         } @else {
           <div class="promo-card-image placeholder-image">
-            <span>{{ promo.nom.substring(0,1).toUpperCase() || 'P' }}</span>
+            <span>{{ promo.name.substring(0,1).toUpperCase() || 'P' }}</span>
           </div>
         }
         <div class="promo-card-content">
-          <h3 class="promo-name">{{ promo.nom }}</h3>
-          <p class="promo-members-count">{{ promo.members?.length || 0 }} membre(s)</p>
+          <h3 class="promo-name">{{ promo.name }}</h3>
+          <p class="promo-members-count">{{ promo.people?.length || 0 }} membre(s)</p>
         </div>
       </div>
       <div class="promo-card-actions">
-        <button type="button" class="icon-button edit-button" title="Modifier la promo"
-          (click)="openEditPromoModal(promo); $event.stopPropagation();">
+        <button type="button" class="icon-button edit-button" title="Modifier la promo" (click)="openEditPromoModal(promo); $event.stopPropagation();">
           <img src="assets/pen.png" alt="Modifier">
         </button>
-        <button type="button" class="icon-button delete-button" title="Supprimer la promo"
-          (click)="openConfirmDeletePromoModal(promo); $event.stopPropagation();">
+        <button type="button" class="icon-button delete-button" title="Supprimer la promo" (click)="openConfirmDeletePromoModal(promo); $event.stopPropagation();">
           <img src="assets/trash.png" alt="Supprimer">
         </button>
       </div>
@@ -54,14 +51,12 @@
     <form class="modal-form create-promo-form" (ngSubmit)="onSavePromoSubmit()">
       <div class="form-group">
         <label for="promo-name">Nom de la Promo :</label>
-        <input type="text" id="promo-name" name="promoName" placeholder="Ex: Les Poneys Agile" required
-          [(ngModel)]="currentPromoData.nom">
+        <input type="text" id="promo-name" name="promoName" placeholder="Ex: Les Poneys Agile" required [(ngModel)]="currentPromoData.nom">
       </div>
 
       <div class="form-group">
         <label for="promo-image-url">URL de l'image (optionnel) :</label>
-        <input type="url" id="promo-image-url" name="promoImageUrl" placeholder="https://exemple.com/image.jpg"
-          [(ngModel)]="currentPromoData.imageUrl">
+        <input type="url" id="promo-image-url" name="promoImageUrl" placeholder="https://exemple.com/image.jpg" [(ngModel)]="currentPromoData.imageUrl">
       </div>
 
       <div class="form-section">
@@ -71,8 +66,7 @@
           @for (member of currentPromoData.members; let i = $index; track i) {
           <li>
             <span>{{ member.nom }} <em>({{ member.email || 'email non défini' }})</em></span>
-            <button type="button" class="remove-member-button" (click)="removePersonFromCurrentPromo(member)"
-              title="Retirer {{member.nom}}">×</button>
+            <button type="button" class="remove-member-button" (click)="removePersonFromCurrentPromo(member)" title="Retirer {{member.nom}}">×</button>
           </li>
           }
         </ul>
@@ -82,32 +76,16 @@
 
         <hr class="form-divider">
 
-        <div class="add-person-input-section">
-          <h5>Ajouter une nouvelle personne :</h5>
-          <div class="form-group">
-            <label for="newPersonName">Nom :</label>
-            <input type="text" id="newPersonName" [(ngModel)]="newPersonName" name="newPersonName"
-              placeholder="Nom de la personne">
-          </div>
-          <div class="form-group">
-            <label for="newPersonEmail">Email :</label>
-            <input type="email" id="newPersonEmail" [(ngModel)]="newPersonEmail" name="newPersonEmail"
-              placeholder="email@exemple.com">
-          </div>
-          <button type="button" class="button-add-person" (click)="createAndAddPerson()">Ajouter</button>
+        <h5>Ajouter une personne existante :</h5>
+        <div class="form-group">
+          <label for="personSelect">Sélectionnez une personne :</label>
+          <select id="personSelect" [(ngModel)]="newPersonId" name="newPersonId">
+            <option *ngFor="let person of allPeople" [value]="person.id">
+              {{ person.nom }} ({{ person.email }})
+            </option>
+          </select>
         </div>
-
-        <h5>Ou choisir parmi les personnes disponibles :</h5>
-        <div class="available-people-for-edit-list">
-          @for (person of getAvailablePeopleForSelection(); let i = $index; track i) {
-          <button type="button" class="person-item-to-add" (click)="addPersonToCurrentPromo(person)"
-            (keydown.enter)="addPersonToCurrentPromo(person)" title="Ajouter {{person.nom}} à la promo">
-            + {{ person.nom }} ({{person.email}})
-          </button>
-          } @empty {
-          <p>Toutes les personnes disponibles sont déjà dans cette promo.</p>
-          }
-        </div>
+        <button type="button" (click)="addPersonToCurrentPromoById()">Ajouter à la promo</button>
       </div>
 
       @if (formError) { <p class="error-message">{{ formError }}</p> }
@@ -130,7 +108,7 @@
       <h2>Confirmer la Suppression</h2>
     </div>
     <div class="modal-body">
-      <p>Êtes-vous sûr de vouloir supprimer la promo "<strong>{{ promoToDelete.nom }}</strong>" ?</p>
+      <p>Êtes-vous sûr de vouloir supprimer la promo "<strong>{{ promoToDelete.name }}</strong>" ?</p>
       <p class="warning-text">Cette action est irréversible et la promo ne pourra plus être assignée à des briefs.</p>
     </div>
     <div class="modal-footer buttons confirm-delete-buttons">
@@ -146,12 +124,12 @@
   <div class="modal-content members-promo-modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
     <button class="modal-close-button" (click)="closePromoMembersModal()" aria-label="Fermer">×</button>
     <div class="modal-header">
-      <h2>Membres de la Promo : {{ selectedPromoForMembers.nom }}</h2>
+      <h2>Membres de la Promo : {{ selectedPromoForMembers.name }}</h2>
     </div>
     <div class="modal-body members-list-body">
-      @if (selectedPromoForMembers.members && selectedPromoForMembers.members.length > 0) {
+      @if (selectedPromoForMembers.people && selectedPromoForMembers.people.length > 0) {
       <ul class="members-ul">
-        @for (member of selectedPromoForMembers.members; let i = $index; track i) {
+        @for (member of selectedPromoForMembers.people; let i = $index; track i) {
         <li class="member-item">
           <span class="member-name">{{ member.nom }}</span>
           <div class="member-details">

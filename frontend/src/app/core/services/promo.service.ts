@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { Promo } from '../services/models/promo.model';
 import { Person } from '../../core/services/models/person.model';
 
@@ -10,12 +10,7 @@ import { Person } from '../../core/services/models/person.model';
 export class PromoService {
   private readonly apiUrl = 'http://localhost:3000/api/promos';
 
-  private readonly promosSubject = new BehaviorSubject<Promo[]>([]);
-  public readonly promos$ = this.promosSubject.asObservable();
-
-  constructor(private readonly http: HttpClient) {
-    // 🧼 Données simulées supprimées : on affichera uniquement ce qui vient de la BDD
-  }
+  constructor(private readonly http: HttpClient) {}
 
   /** 🔁 Récupère toutes les promos avec leur formateur */
   getAllPromos(): Observable<Promo[]> {

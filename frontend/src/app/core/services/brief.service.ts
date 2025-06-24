@@ -1,200 +1,57 @@
-// src/app/core/services/brief.service.ts
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
-import { map } from 'rxjs/operators';
-import { Brief } from '../../core/services/models/brief.model'; 
-import { Person } from '../../core/services/models/person.model';
-import { UserRole } from '../../core/services/models/user.model'; 
 import { HttpClient } from '@angular/common/http';
-
-
-const apprenantTestUser: Person = {
-  id: 'user-apprenant-id', 
-  nom: 'Apprenant Test User',
-  email: 'apprenant@test.com',
-  role: UserRole.APPRENANT, 
-  genre: 'nsp',
-  aisanceFrancais: 3,
-  ancienDWWM: false,
-  niveauTechnique: 2,
-  profil: 'reserve',
-  age: 25
-};
-
-const autreApprenant1: Person = {
-  id: 'p1', nom: 'Alice Lemaire', email: 'alice@mail.com', genre: 'feminin',
-  aisanceFrancais: 4, ancienDWWM: true, niveauTechnique: 3, profil: 'alaise', age: 28
-};
-
-const autreApprenant2: Person = {
-  id: 'p2', nom: 'Bob Martin', email: 'bob@mail.com', genre: 'masculin',
-  aisanceFrancais: 3, ancienDWWM: false, niveauTechnique: 2, profil: 'reserve', age: 22
-};
-// --- FIN DES PERSONNES DE TEST ---
-
-
-// Liste de départ de tes briefs.
-const INITIAL_BRIEFS_DATA: Brief[] = [
-  {
-    id: 'brief-portfolio-poneys',
-    name: 'Projet Portfolio',    // Utilisé pour le titre affiché dans la carte du formateur
-    title: 'Projet Portfolio',   // Utilisé pour le titre dans le détail et la carte apprenant
-    description: 'Création d\'un site portfolio personnel.',
-    imageUrl: 'assets/portfolio.png',
-    sourceGroupId: 'grpPoneys', // Promo d'où viennent les élèves pour la génération des groupes
-    promoId: 'grpPoneys',       // Promo à laquelle ce brief est destiné (pour l'apprenant)
-    creationDate: new Date('2024-01-15'),
-    groups: [ // <--- MODIFICATION ICI : Groupes pré-remplis
-      {
-        id: 'wg-portfolio-alpha-123', // ID unique pour ce sous-groupe
-        name: 'Équipe Alpha (Portfolio)',
-        members: [apprenantTestUser, autreApprenant1] // apprenantTestUser est ici
-      }
-    ]
-  },
-  {
-    id: 'brief-ecommerce-marmottes', // L'ID du brief
-    name: 'API E-commerce',
-    title: 'API E-commerce',
-    description: 'Développement d\'une API pour un site marchand.',
-    imageUrl: 'assets/taches.png',
-    sourceGroupId: 'grpPoneys', // Les membres viennent des Poneys
-    promoId: 'grpPoneys',       // Mais le brief est pour la promo Poneys (donc apprenantTestUser devrait le voir)
-    creationDate: new Date('2024-02-20'),
-    groups: [ // <--- MODIFICATION ICI : Groupes pré-remplis
-      {
-        id: 'wg-ecommerce-frontend-456',
-        name: 'Frontend Masters (E-commerce)',
-        members: [apprenantTestUser, autreApprenant2] // apprenantTestUser est aussi ici
-      },
-      {
-        id: 'wg-ecommerce-backend-789',
-        name: 'Backend Ninjas (E-commerce)',
-        members: [autreApprenant1] // apprenantTestUser n'est PAS dans ce sous-groupe particulier
-      }
-    ]
-  },
-  {
-    id: 'brief-jeu-chatons',
-    name: 'Jeu 2D',
-    title: 'Création Jeu 2D',
-    description: 'Développement d\'un petit jeu en JavaScript.',
-    imageUrl: 'assets/jeu.png',
-    sourceGroupId: 'grpChatons', // Supposons une promo Chatons
-    promoId: 'grpChatons',       // Si apprenantTestUser est dans 'grpPoneys', il ne verra pas ce brief
-    creationDate: new Date('2024-03-10'),
-    groups: [ // Exemple de groupe, mais l'apprenant ne le verra que si promoId correspond
-        { id: 'wg-jeu-designers-abc', name: 'Game Designers', members: [autreApprenant1, autreApprenant2] }
-    ]
-  },
-  {
-    id: 'brief-sans-groupes',
-    name: 'Brief sans groupes initiaux',
-    title: 'Brief sans groupes initiaux',
-    description: 'Ce brief n\'a pas de groupes définis au départ.',
-    imageUrl: 'assets/jsp.png',
-    sourceGroupId: 'grpPoneys',
-    promoId: 'grpPoneys',
-    creationDate: new Date('2024-04-01'),
-    groups: [] // Vide, comme avant, pour tester le cas "aucun groupe" pour ce brief
-  }
-];
+import { Observable } from 'rxjs';
+import { Brief } from '../../core/services/models/brief.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class BriefService {
-  private briefsData: Brief[] = JSON.parse(JSON.stringify(INITIAL_BRIEFS_DATA));
-  private readonly briefsSubject = new BehaviorSubject<Brief[]>(this.copyBriefsData());
-  public briefs$: Observable<Brief[]> = this.briefsSubject.asObservable();
+  private readonly apiUrl = 'http://localhost:3000/api/briefs';
 
-  constructor(private readonly http: HttpClient) {
-    console.log('BriefService initialisé avec:', JSON.parse(JSON.stringify(this.briefsSubject.getValue())));
-  }
+  constructor(private readonly http: HttpClient) {}
 
-  private copyBriefsData(): Brief[] {
-    return JSON.parse(JSON.stringify(this.briefsData));
-  }
-
-  getBriefById(id: string): Observable<Brief | undefined> {
-    return this.briefs$.pipe(
-      map(allBriefs => {
-        const foundBrief = allBriefs.find(brief => brief.id === id);
-        return foundBrief; // La copie est déjà faite par briefs$ qui émet des copies
-      })
-    );
-  }
-
-  getBriefsByPromoId(promoId: string): Observable<Brief[]> {
-    return this.briefs$.pipe(
-      map(allBriefs => {
-
-        const filteredBriefs = allBriefs.filter(brief => brief.promoId === promoId);
-        return filteredBriefs; // map sur un observable qui émet des copies renverra un tableau de ces copies
-      })
-    );
-  }
-
+  /** 🔁 Récupère tous les briefs */
   getAllBriefs(): Observable<Brief[]> {
-    return this.briefs$; // briefs$ émet déjà des copies grâce à copyBriefsData()
+    return this.http.get<Brief[]>(this.apiUrl);
   }
 
-  addBrief(
-    briefData: Omit<Brief, 'id' | 'creationDate' | 'groups' | 'promoId' | 'sourceGroupId'>,
-    targetPromoId: string,
-    sourcePromoId: string | number
-  ): Observable<Brief> {
-    const newBrief: Brief = {
-      id: `brief-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
-      title: briefData.title, // S'assurer que briefData a bien title et name
-      name: briefData.name,
-      description: briefData.description,
-      imageUrl: briefData.imageUrl,
-      promoId: targetPromoId,
-      sourceGroupId: sourcePromoId,
-      creationDate: new Date(),
-      groups: [] // Les nouveaux briefs sont initialisés avec un tableau de groupes vide
-    };
-    this.briefsData.push(newBrief);
-    this.briefsSubject.next(this.copyBriefsData());
-    console.log('BriefService: Nouveau brief ajouté:', newBrief);
-    return of(JSON.parse(JSON.stringify(newBrief))); // Retourner une copie
+  /** 🔍 Récupère un brief spécifique par son ID */
+  getBriefById(id: string): Observable<Brief> {
+    return this.http.get<Brief>(`${this.apiUrl}/${id}`);
   }
 
-  updateBrief(updatedBrief: Brief): Observable<Brief | undefined> {
-    const index = this.briefsData.findIndex(b => b.id === updatedBrief.id);
-    if (index > -1) {
-      this.briefsData[index] = JSON.parse(JSON.stringify(updatedBrief)); // Remplacer par une copie profonde
-      console.log('BriefService: Brief dans briefsData APRÈS MAJ:', JSON.parse(JSON.stringify(this.briefsData[index])));
-      this.briefsSubject.next(this.copyBriefsData());
-      return of(JSON.parse(JSON.stringify(this.briefsData[index])));
-    }
-    console.warn(`BriefService: Tentative de MAJ d'un brief non trouvé (ID: ${updatedBrief.id})`);
-    return of(undefined);
+  /** 🔍 Récupère tous les briefs d'une promo */
+  getBriefsByPromoId(promoId: string): Observable<Brief[]> {
+    return this.http.get<Brief[]>(`${this.apiUrl}/promo/${promoId}`);
   }
 
-  deleteBrief(briefId: string): Observable<boolean> {
-    const initialLength = this.briefsData.length;
-    this.briefsData = this.briefsData.filter(brief => brief.id !== briefId);
-    if (this.briefsData.length < initialLength) {
-      this.briefsSubject.next(this.copyBriefsData());
-      console.log(`BriefService: Brief avec ID '${briefId}' supprimé.`);
-      return of(true);
-    }
-    console.warn(`BriefService: Tentative de suppression d'un brief non trouvé (ID: ${briefId})`);
-    return of(false);
+  /** ➕ Crée un nouveau brief */
+  createBrief(data: Partial<Brief>): Observable<Brief> {
+    return this.http.post<Brief>(this.apiUrl, data);
   }
 
-  getBriefsByMe(): Observable<any[]> {
-  const token = localStorage.getItem('token');
-  const headers = { 'Authorization': `Bearer ${token}` };
-  return this.http.get<any[]>('/api/briefs/me', { headers });
-}
+  /** ✏️ Met à jour un brief existant */
+  updateBrief(id: string, data: Partial<Brief>): Observable<Brief> {
+    return this.http.put<Brief>(`${this.apiUrl}/${id}`, data);
+  }
 
-getGroupsForBrief(briefId: number): Observable<any[]> {
-  const token = localStorage.getItem('token');
-  const headers = { 'Authorization': `Bearer ${token}` };
-  return this.http.get<any[]>(`/api/briefs/${briefId}/groups`, { headers });
-}
+  /** ❌ Supprime un brief */
+  deleteBrief(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  }
 
+  /** 👤 Récupère les briefs de l'utilisateur connecté */
+  getBriefsByMe(): Observable<Brief[]> {
+    const token = localStorage.getItem('token');
+    const headers = { 'Authorization': `Bearer ${token}` };
+    return this.http.get<Brief[]>(`${this.apiUrl}/me`, { headers });
+  }
+
+  /** 👥 Récupère les groupes associés à un brief */
+  getGroupsForBrief(briefId: number): Observable<any[]> {
+    const token = localStorage.getItem('token');
+    const headers = { 'Authorization': `Bearer ${token}` };
+    return this.http.get<any[]>(`${this.apiUrl}/${briefId}/groups`, { headers });
+  }
 }
