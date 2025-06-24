@@ -3,6 +3,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 require("dotenv").config();
 const cors = require("cors");
+const userRoutes = require("./routes/user.routes");
 
 // Base de données
 const db = require("./database");
@@ -20,7 +21,7 @@ app.use(express.json());
 
 // Toutes les routes passent par /api
 app.use("/api", routes);
-
+app.use("/api/users", userRoutes); 
 // Test simple
 app.get("/", (req, res) => {
   res.json({ message: "Bienvenue sur le backend Simplon Group Generator V2 !" });

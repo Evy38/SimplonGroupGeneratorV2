@@ -1,6 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subscription } from 'rxjs';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { ListService } from '../../../core/services/list.service';
@@ -17,7 +18,7 @@ import { Promo } from '../../../core/services/models/promo.model';
   templateUrl: './apprenant-dashboard.component.html',
   styleUrls: ['./apprenant-dashboard.component.css']
 })
-export class ApprenantDashboardComponent implements OnInit {
+export class ApprenantDashboardComponent implements OnInit, OnDestroy {
   currentUser: User | null = null;
   welcomeMessage: string = 'Bienvenue sur votre Dashboard !';
 
@@ -32,6 +33,8 @@ export class ApprenantDashboardComponent implements OnInit {
 
   isPromoModalOpen = false;
 
+  private subscriptions = new Subscription();
+
   constructor(
     private readonly authService: AuthService,
     private readonly listService: ListService,
@@ -39,34 +42,42 @@ export class ApprenantDashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.currentUser = this.authService.currentUserValue;
+    const sub = this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
 
-    if (this.currentUser?.firstname && this.currentUser?.lastname) {
-      this.welcomeMessage = `Bienvenue, ${this.currentUser.firstname} ${this.currentUser.lastname} !`;
-    }
+      if (this.currentUser?.firstname && this.currentUser?.lastname) {
+        this.welcomeMessage = `Bienvenue, ${this.currentUser.firstname} ${this.currentUser.lastname} !`;
+      }
 
-    if (this.currentUser?.email) {
-      this.promoService.getAllPromos().subscribe((promos: Promo[]) => {
-        const matchedPromo = promos.find(p =>
-          p.members?.some(member => member.email === this.currentUser?.email)
-        );
+      if (this.currentUser?.email) {
+        this.promoService.getAllPromos().subscribe((promos: Promo[]) => {
+          const matchedPromo = promos.find(p =>
+            p.members?.some(member => member.email === this.currentUser?.email)
+          );
 
-        if (matchedPromo) {
-          this.currentPromoName = matchedPromo.nom;
-          this.promoName = matchedPromo.nom;
-          this.currentPromoMembers = matchedPromo.members ?? [];
-        }
+          if (matchedPromo) {
+            this.currentPromoName = matchedPromo.nom;
+            this.promoName = matchedPromo.nom;
+            this.currentPromoMembers = matchedPromo.members ?? [];
+          }
 
-        this.isLoading = false;
-      });
-    }
+          this.isLoading = false;
+        });
+      }
+    });
+
+    this.subscriptions.add(sub);
   }
 
-  openPromoModal() {
+  openPromoModal(): void {
     this.isPromoModalOpen = true;
   }
 
-  closePromoModal() {
+  closePromoModal(): void {
     this.isPromoModalOpen = false;
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 }

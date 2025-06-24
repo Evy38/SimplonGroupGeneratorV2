@@ -5,18 +5,20 @@ import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router'; // Pour routerLink, routerLinkActive
 
+
+
 @Component({
   selector: 'app-sidebar',
   standalone: true,
   imports: [CommonModule, RouterModule ], 
   templateUrl: './sidebar.component.html',
-  styleUrl: './sidebar.component.css'
+  styleUrls: ['./sidebar.component.css']
 })
 
 export class SidebarComponent {
   constructor(
-    private authService: AuthService,
-    private router: Router // Injecte Router
+    private readonly authService: AuthService,
+    private readonly router: Router // Injecte Router
   ) {}
 
   logout(): void {

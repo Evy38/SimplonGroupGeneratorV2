@@ -1,4 +1,3 @@
-// src/app/features/formateur/brief-detail/brief-detail.component.ts
 import { Component, OnInit, OnDestroy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -9,12 +8,11 @@ import {
 } from 'rxjs';
 
 import { Brief } from '../../../core/services/models/brief.model';
-import { Promo} from '../../../core/services/models/promo.model';
+import { Promo } from '../../../core/services/models/promo.model';
 import { Person } from '../../../core/services/models/person.model';
 
 import { PromoService } from '../../../core/services/promo.service';
 import { BriefService } from '../../../core/services/brief.service';
-
 
 import {
   CdkDragDrop,
@@ -56,10 +54,10 @@ export class BriefDetailComponent implements OnInit, OnDestroy {
   generationError: string | null = null;
 
   isMembersModalOpen = false;
-  selectedWorkGroupForMembers: Promo| null = null;
+  selectedWorkGroupForMembers: Promo | null = null;
 
   isEditWorkGroupModalOpen = false;
-  selectedWorkGroupToEdit: Promo| null = null;
+  selectedWorkGroupToEdit: Promo | null = null;
   editableWorkGroupData!: {
     id: string | number;
     nom: string;
@@ -70,10 +68,9 @@ export class BriefDetailComponent implements OnInit, OnDestroy {
   newPersonInput = '';
 
   isDeleteWorkGroupConfirmModalOpen = false;
-  workGroupToDelete: Promo| null = null;
+  workGroupToDelete: Promo | null = null;
 
   hasUnsavedWorkGroupChanges = false;
-
 
   get connectedDropListIds(): string[] {
     const ids = this.generatedWorkGroups.map(g => `group-list-${g.id}`);
@@ -86,6 +83,7 @@ export class BriefDetailComponent implements OnInit, OnDestroy {
 
   private readonly collaborationHistory = new Map<string, Set<string>>();
   private readonly subscriptions = new Subscription();
+
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -110,33 +108,21 @@ export class BriefDetailComponent implements OnInit, OnDestroy {
     );
 
     this.sourceGroupForBrief$ = this.brief$.pipe(
-      filter(
-        (b): b is Brief =>
-          !!b && b.sourceGroupId !== null && b.sourceGroupId !== undefined
-      ),
-      switchMap(b =>
-        this.promoService.getPromoById(b.sourceGroupId!.toString())
-      ),
+      filter((b): b is Brief => !!b && b.sourceGroupId != null),
+      switchMap(b => this.promoService.getPromoById(Number(b.sourceGroupId))),
       tap(promo => {
         if (!promo) {
-          console.warn(
-            'BriefDetail: Promo source non trouvée pour le brief.'
-          );
+          console.warn('BriefDetail: Promo source non trouvée pour le brief.');
         }
       })
     );
 
-    this.viewData$ = combineLatest([
-      this.brief$,
-      this.sourceGroupForBrief$
-    ]).pipe(
+    this.viewData$ = combineLatest([this.brief$, this.sourceGroupForBrief$]).pipe(
       map(([loadedBrief, sourcePromo]) => {
         if (loadedBrief) {
           return {
             brief: loadedBrief,
-            sourceGroup:
-              sourcePromo ||
-              this.createEmptyPromoPlaceholder(loadedBrief.sourceGroupId)
+            sourceGroup: sourcePromo || this.createEmptyPromoPlaceholder(loadedBrief.sourceGroupId)
           };
         }
         return undefined;
@@ -144,42 +130,23 @@ export class BriefDetailComponent implements OnInit, OnDestroy {
       tap(data => {
         if (data?.brief) {
           this.brief = { ...data.brief };
-          this.sourceGroupForBrief = data.sourceGroup
-            ? { ...data.sourceGroup }
-            : undefined;
-          console.log(
-            'BriefDetail: viewData$ émis. Brief:',
-            this.brief,
-            'Promo Source:',
-            this.sourceGroupForBrief
-          );
+          this.sourceGroupForBrief = data.sourceGroup ? { ...data.sourceGroup } : undefined;
 
-          if (this.brief.groups && this.brief.groups.length > 0) {
-            this.generatedWorkGroups = JSON.parse(
-              JSON.stringify(this.brief.groups)
-            );
-            console.log(
-              'Groupes de travail chargés depuis le brief existant:',
-              this.generatedWorkGroups
-            );
+          if (this.brief.groups?.length) {
+            this.generatedWorkGroups = JSON.parse(JSON.stringify(this.brief.groups));
           } else {
             this.simulateInitialGroupGeneration();
           }
-          if (
-            this.sourceGroupForBrief &&
-            this.sourceGroupForBrief.members
-          ) {
-            this.initializeUnassignedMembers(
-              this.sourceGroupForBrief.members
-            );
+
+          if (this.sourceGroupForBrief?.members) {
+            this.initializeUnassignedMembers(this.sourceGroupForBrief.members);
           } else {
             this.unassignedMembersFromBrief = [];
           }
+
           this.hasUnsavedWorkGroupChanges = false;
         } else if (this.brief && !this.sourceGroupForBrief) {
-          console.warn(
-            'BriefDetail: Brief chargé mais promo source non disponible.'
-          );
+          console.warn('Brief chargé mais promo source non disponible.');
           this.generatedWorkGroups = this.brief.groups
             ? JSON.parse(JSON.stringify(this.brief.groups))
             : [];
@@ -189,41 +156,33 @@ export class BriefDetailComponent implements OnInit, OnDestroy {
       })
     );
   }
-
-private createEmptyPromoPlaceholder(id?: string | number | null): Promo {
-  return {
-    id: id?.toString() ?? 'unknown-promo-id',
-    nom: 'Promo source non trouvée',
-    members: []
-  };
-}
-
-
   ngOnInit(): void {
     this.subscriptions.add(this.viewData$.subscribe());
     this.updateDropListIds();
   }
-updateDropListIds(): void {
-  // This method is no longer needed since connectedDropListIds is a getter.
-  // If you need to trigger change detection, do it here.
-  this.cdr.detectChanges();
-}
 
+
+  private createEmptyPromoPlaceholder(id?: string | number | null): Promo {
+    return {
+      id: typeof id === 'number' ? id : -1,
+      nom: 'Promo source non trouvée',
+      members: []
+    };
+  }
+
+  updateDropListIds(): void {
+    // Même si connectedDropListIds est un getter, on peut forcer un refresh si besoin :
+    this.cdr.detectChanges();
+  }
   simulateInitialGroupGeneration(): void {
     if (
       this.brief &&
-      this.sourceGroupForBrief &&
-      this.sourceGroupForBrief.members &&
-      this.sourceGroupForBrief.members.length > 0
+      this.sourceGroupForBrief?.members?.length
     ) {
-      if (this.generatedWorkGroups.length > 0) {
-        return;
-      }
+      if (this.generatedWorkGroups.length > 0) return;
+
       const criteriaForSample = {
-        peoplePerGroup: Math.min(
-          2,
-          this.sourceGroupForBrief.members.length
-        ),
+        peoplePerGroup: Math.min(2, this.sourceGroupForBrief.members.length),
         mixAncienDWWM: false,
         mixGenre: false,
         mixAisanceFrancais: false,
@@ -231,16 +190,12 @@ updateDropListIds(): void {
         mixProfil: false,
         mixAge: false
       };
+
       if (
-        this.sourceGroupForBrief.members.length >=
-          criteriaForSample.peoplePerGroup &&
+        this.sourceGroupForBrief.members.length >= criteriaForSample.peoplePerGroup &&
         criteriaForSample.peoplePerGroup > 0
       ) {
-        this.generateGroupsLogic(
-          this.sourceGroupForBrief.members,
-          criteriaForSample,
-          2
-        );
+        this.generateGroupsLogic(this.sourceGroupForBrief.members, criteriaForSample, 2);
       } else {
         this.generatedWorkGroups = [];
       }
@@ -251,17 +206,17 @@ updateDropListIds(): void {
 
   onGenerateGroupsSubmit(): void {
     this.generationError = null;
+
     if (
       !this.brief ||
-      !this.sourceGroupForBrief ||
-      !this.sourceGroupForBrief.members ||
-      this.sourceGroupForBrief.members.length === 0
+      !this.sourceGroupForBrief?.members?.length
     ) {
-      this.generationError =
-        'Données du brief ou de la promo source (avec membres) manquantes.';
+      this.generationError = 'Données du brief ou de la promo source (avec membres) manquantes.';
       return;
     }
+
     const sourcePeople = this.sourceGroupForBrief.members;
+
     if (
       this.generationCriteria.peoplePerGroup <= 0 ||
       sourcePeople.length < this.generationCriteria.peoplePerGroup
@@ -269,43 +224,42 @@ updateDropListIds(): void {
       this.generationError = `Vérifiez le nombre de personnes par sous-groupe (min 1, max ${sourcePeople.length} pour cette promo).`;
       return;
     }
+
     this.generateGroupsLogic(sourcePeople, this.generationCriteria);
+
     if (this.sourceGroupForBrief?.members) {
       this.initializeUnassignedMembers(this.sourceGroupForBrief.members);
     }
+
     this.hasUnsavedWorkGroupChanges = true;
     this.closeGenerateGroupsModal();
   }
-
   private generateGroupsLogic(
     peopleInSourceGroup: Person[],
     criteria: typeof this.generationCriteria,
     numberOfWorkGroupsToSimulate?: number
   ): void {
-    let availablePeople = JSON.parse(
-      JSON.stringify(peopleInSourceGroup)
-    ) as Person[];
+    let availablePeople = JSON.parse(JSON.stringify(peopleInSourceGroup)) as Person[];
+
     for (let i = availablePeople.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
-      [availablePeople[i], availablePeople[j]] = [
-        availablePeople[j],
-        availablePeople[i]
-      ];
+      [availablePeople[i], availablePeople[j]] = [availablePeople[j], availablePeople[i]];
     }
+
     const newWorkGroups: Promo[] = [];
     let workGroupCounter = 1;
-    const numTargetGroups =
-      numberOfWorkGroupsToSimulate ||
+    const numTargetGroups = numberOfWorkGroupsToSimulate ||
       Math.floor(availablePeople.length / criteria.peoplePerGroup);
 
     for (let i = 0; i < numTargetGroups; i++) {
       if (availablePeople.length === 0) break;
-      const groupSize =
-        i === numTargetGroups - 1 && numberOfWorkGroupsToSimulate
-          ? Math.min(criteria.peoplePerGroup, availablePeople.length)
-          : numberOfWorkGroupsToSimulate
+
+      const groupSize = i === numTargetGroups - 1 && numberOfWorkGroupsToSimulate
+        ? Math.min(criteria.peoplePerGroup, availablePeople.length)
+        : numberOfWorkGroupsToSimulate
           ? criteria.peoplePerGroup
           : Math.min(criteria.peoplePerGroup, availablePeople.length);
+
       if (
         availablePeople.length < groupSize &&
         !(i === numTargetGroups - 1 && numberOfWorkGroupsToSimulate)
@@ -314,98 +268,103 @@ updateDropListIds(): void {
           break;
         }
       }
+
       const membersForNewWorkGroup: Person[] = [];
       let attemptsToFillGroup = 0;
+
       while (
         membersForNewWorkGroup.length < groupSize &&
         availablePeople.length > 0 &&
-        attemptsToFillGroup < (peopleInSourceGroup?.length ?? 0) * 2
+        attemptsToFillGroup < (peopleInSourceGroup.length * 2)
       ) {
         attemptsToFillGroup++;
+
         let bestCandidateIndex = -1;
         let minPastCollaborations = Infinity;
+
         for (let k = 0; k < availablePeople.length; k++) {
           const candidate = availablePeople[k];
           let collaborationsWithCurrentGroup = 0;
-          membersForNewWorkGroup.forEach(memberInGroup => {
+
+          membersForNewWorkGroup.forEach(member => {
             if (
               this.collaborationHistory.has(candidate.id.toString()) &&
-              this.collaborationHistory
-                .get(candidate.id.toString())!
-                .has(memberInGroup.id.toString())
+              this.collaborationHistory.get(candidate.id.toString())!.has(member.id.toString())
             ) {
               collaborationsWithCurrentGroup++;
             }
           });
+
           if (collaborationsWithCurrentGroup < minPastCollaborations) {
             minPastCollaborations = collaborationsWithCurrentGroup;
             bestCandidateIndex = k;
           }
+
           if (minPastCollaborations === 0) break;
         }
+
         if (bestCandidateIndex !== -1) {
-          membersForNewWorkGroup.push(
-            availablePeople.splice(bestCandidateIndex, 1)[0]
-          );
+          membersForNewWorkGroup.push(availablePeople.splice(bestCandidateIndex, 1)[0]);
         } else if (availablePeople.length > 0) {
           membersForNewWorkGroup.push(availablePeople.splice(0, 1)[0]);
         } else {
           break;
         }
       }
+
       if (membersForNewWorkGroup.length > 0) {
         newWorkGroups.push({
-          id: `brief-${this.brief?.id || 'unknown'}-wg-${Date.now()}-${workGroupCounter}`,
+          id: Date.now() + workGroupCounter,
           nom: `Équipe ${workGroupCounter}`,
           members: membersForNewWorkGroup
         });
         workGroupCounter++;
       }
     }
+
     if (availablePeople.length > 0 && !numberOfWorkGroupsToSimulate) {
       newWorkGroups.push({
-        id: `brief-${this.brief?.id || 'unknown'}-wg-${Date.now()}-${workGroupCounter}`,
+        id: Date.now() + workGroupCounter,
         nom: `Équipe ${workGroupCounter} (Reste)`,
         members: availablePeople
       });
     }
-    this.generatedWorkGroups = newWorkGroups;
-    this.updateCollaborationHistory(this.generatedWorkGroups);
-  }
 
+    this.generatedWorkGroups = newWorkGroups;
+    this.updateCollaborationHistory(newWorkGroups);
+  }
   initializeUnassignedMembers(allPromoMembers: Person[] | undefined): void {
-    if (!allPromoMembers || allPromoMembers.length === 0) {
+    if (!allPromoMembers?.length) {
       this.unassignedMembersFromBrief = [];
       this.cdr.detectChanges();
       return;
     }
+
     const assignedMemberIds = new Set<string>();
-    this.generatedWorkGroups.forEach(promo=> {
-      if (promo.members) {
-        promo.members.forEach(member =>
-          assignedMemberIds.add(member.id)
-        );
-      }
+
+    this.generatedWorkGroups.forEach(group => {
+      group.members?.forEach(member => {
+        assignedMemberIds.add(member.id.toString());
+      });
     });
+
     this.unassignedMembersFromBrief = allPromoMembers.filter(
-      person => !assignedMemberIds.has(person.id)
+      person => !assignedMemberIds.has(person.id.toString())
     );
+
     this.cdr.detectChanges();
-    console.log(
-      'Membres non assignés initialisés/mis à jour:',
-      this.unassignedMembersFromBrief.length
-    );
+    console.log('Membres non assignés mis à jour:', this.unassignedMembersFromBrief.length);
   }
 
-removePersonFromAllGroups(person: Person): void {
-  this.generatedWorkGroups.forEach(promo=> {
-    if (promo.members) {
-      promo.members = promo.members.filter(m => m.id !== person.id);
-    }
-  });
-  this.unassignedMembersFromBrief = this.unassignedMembersFromBrief.filter(m => m.id !== person.id);
-}
+  removePersonFromAllGroups(person: Person): void {
+    this.generatedWorkGroups.forEach(group => {
+      if (group.members) {
+        group.members = group.members.filter(m => m.id !== person.id);
+      }
+    });
 
+    this.unassignedMembersFromBrief = this.unassignedMembersFromBrief.filter(m => m.id !== person.id);
+  }
 
   dropMember(
     event: CdkDragDrop<Person[], any, Person>,
@@ -421,11 +380,7 @@ removePersonFromAllGroups(person: Person): void {
     }
 
     if (event.previousContainer === event.container) {
-      moveItemInArray(
-        event.container.data,
-        event.previousIndex,
-        event.currentIndex
-      );
+      moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
     } else {
       this.removePersonFromAllGroups(movedPerson);
       transferArrayItem(
@@ -445,9 +400,10 @@ removePersonFromAllGroups(person: Person): void {
       }
       return g;
     });
+
     this.generatedWorkGroups = [...this.generatedWorkGroups];
 
-    if (this.sourceGroupForBrief && this.sourceGroupForBrief.members) {
+    if (this.sourceGroupForBrief?.members) {
       this.initializeUnassignedMembers(this.sourceGroupForBrief.members);
     }
 
@@ -462,63 +418,54 @@ removePersonFromAllGroups(person: Person): void {
       alert('Erreur : Brief non chargé.');
       return;
     }
+
     if (!this.hasUnsavedWorkGroupChanges) {
       console.log('Aucun changement non sauvegardé détecté.');
       alert('Aucun changement à sauvegarder.');
       return;
     }
+
     const briefToUpdate: Brief = {
       ...this.brief,
       groups: JSON.parse(JSON.stringify(this.generatedWorkGroups))
     };
-    console.log(
-      'BriefDetail - Données envoyées à updateBrief:',
-      briefToUpdate
-    );
+
+    console.log('BriefDetail - Données envoyées à updateBrief:', briefToUpdate);
 
     this.subscriptions.add(
-      this.briefService.updateBrief(briefToUpdate).subscribe({
+      this.briefService.updateBrief(
+        String(briefToUpdate.id),
+        briefToUpdate
+      ).subscribe({
         next: (savedBrief?: Brief) => {
           if (savedBrief) {
             this.brief = { ...savedBrief };
             this.generatedWorkGroups = savedBrief.groups
               ? JSON.parse(JSON.stringify(savedBrief.groups))
               : [];
+
             if (this.sourceGroupForBrief?.members) {
-              this.initializeUnassignedMembers(
-                this.sourceGroupForBrief.members
-              );
+              this.initializeUnassignedMembers(this.sourceGroupForBrief.members);
             }
+
             this.hasUnsavedWorkGroupChanges = false;
             alert('Groupes sauvegardés avec succès !');
             this.cdr.detectChanges();
           } else {
-            alert(
-              'Erreur lors de la sauvegarde : Le brief retourné est indéfini.'
-            );
+            alert('Erreur lors de la sauvegarde : Le brief retourné est indéfini.');
           }
         },
         error: (err: any) => {
-          console.error(
-            'Erreur lors de la sauvegarde des sous-groupes:',
-            err
-          );
-          alert(
-            'Une erreur est survenue lors de la sauvegarde des groupes.'
-          );
+          console.error('Erreur lors de la sauvegarde des sous-groupes:', err);
+          alert('Une erreur est survenue lors de la sauvegarde des groupes.');
         }
       })
     );
   }
-
   // --- MODALES ---
+
   openGenerateGroupsModal(): void {
-    if (
-      !this.brief ||
-      !this.sourceGroupForBrief ||
-      !this.sourceGroupForBrief.members ||
-      this.sourceGroupForBrief.members.length === 0
-    ) {
+    if (!this.brief || !this.sourceGroupForBrief?.members?.length) {
       alert('Promo source ou membres manquants.');
       return;
     }
@@ -529,27 +476,23 @@ removePersonFromAllGroups(person: Person): void {
     this.generationError = null;
     this.isGenerateGroupsModalOpen = true;
   }
+
   closeGenerateGroupsModal(): void {
     this.isGenerateGroupsModalOpen = false;
   }
 
-  openWorkGroupMembersModal(
-    workGroup: Promo,
-    event: MouseEvent
-  ): void {
+  openWorkGroupMembersModal(workGroup: Promo, event: MouseEvent): void {
     event.stopPropagation();
     this.selectedWorkGroupForMembers = workGroup;
     this.isMembersModalOpen = true;
   }
+
   closeWorkGroupMembersModal(): void {
     this.isMembersModalOpen = false;
     this.selectedWorkGroupForMembers = null;
   }
 
-  openEditWorkGroupModal(
-    workGroup: Promo,
-    event?: MouseEvent
-  ): void {
+  openEditWorkGroupModal(workGroup: Promo, event?: MouseEvent): void {
     event?.stopPropagation();
     this.selectedWorkGroupToEdit = workGroup;
     this.editableWorkGroupData = JSON.parse(JSON.stringify(workGroup));
@@ -557,55 +500,64 @@ removePersonFromAllGroups(person: Person): void {
     this.newPersonInput = '';
     this.isEditWorkGroupModalOpen = true;
   }
+
   closeEditWorkGroupModal(): void {
     this.isEditWorkGroupModalOpen = false;
     this.selectedWorkGroupToEdit = null;
   }
 
+  openDeleteWorkGroupConfirmModal(workGroup: Promo, event?: MouseEvent): void {
+    event?.stopPropagation();
+    this.workGroupToDelete = workGroup;
+    this.isDeleteWorkGroupConfirmModalOpen = true;
+  }
+
+  closeDeleteWorkGroupConfirmModal(): void {
+    this.isDeleteWorkGroupConfirmModalOpen = false;
+    this.workGroupToDelete = null;
+  }
   onSaveWorkGroupChanges(): void {
     if (!this.editableWorkGroupData || !this.selectedWorkGroupToEdit) {
       this.editWorkGroupError = 'Données invalides.';
       return;
     }
+
     if (!this.editableWorkGroupData.nom.trim()) {
       this.editWorkGroupError = 'Nom requis.';
       return;
     }
+
     const groupIndex = this.generatedWorkGroups.findIndex(
       g => g.id === this.selectedWorkGroupToEdit!.id
     );
+
     if (groupIndex > -1) {
       const updatedGroups = [...this.generatedWorkGroups];
-      updatedGroups[groupIndex] = JSON.parse(
-        JSON.stringify(this.editableWorkGroupData)
-      );
+      updatedGroups[groupIndex] = JSON.parse(JSON.stringify(this.editableWorkGroupData));
       this.generatedWorkGroups = updatedGroups;
       this.hasUnsavedWorkGroupChanges = true;
+
       if (this.sourceGroupForBrief?.members) {
-        this.initializeUnassignedMembers(
-          this.sourceGroupForBrief.members
-        );
+        this.initializeUnassignedMembers(this.sourceGroupForBrief.members);
       }
     } else {
       this.editWorkGroupError = 'Groupe non trouvé.';
     }
+
     this.closeEditWorkGroupModal();
   }
 
   removeMemberFromEditableGroup(memberToRemove: Person): void {
     if (this.editableWorkGroupData) {
       this.editableWorkGroupData.members =
-        this.editableWorkGroupData.members.filter(
-          m => m.id !== memberToRemove.id
-        );
+        this.editableWorkGroupData.members.filter(m => m.id !== memberToRemove.id);
     }
   }
+
   addPersonToEditableGroup(personToAdd: Person): void {
     if (
       this.editableWorkGroupData &&
-      !this.editableWorkGroupData.members.find(
-        m => m.id === personToAdd.id
-      )
+      !this.editableWorkGroupData.members.find(m => m.id === personToAdd.id)
     ) {
       this.editableWorkGroupData.members = [
         ...this.editableWorkGroupData.members,
@@ -613,23 +565,24 @@ removePersonFromAllGroups(person: Person): void {
       ];
     }
   }
+
   addPersonFromInput(): void {
     if (
       !this.newPersonInput.trim() ||
-      !this.sourceGroupForBrief ||
-      !this.sourceGroupForBrief.members
+      !this.sourceGroupForBrief?.members
     ) {
-      this.editWorkGroupError =
-        'Sélectionnez une promo et saisissez un nom/email.';
+      this.editWorkGroupError = 'Sélectionnez une promo et saisissez un nom/email.';
       return;
     }
+
     const promoSourcePeople = this.sourceGroupForBrief.members;
     const searchTerm = this.newPersonInput.trim().toLowerCase();
-    const personFound = promoSourcePeople.find(
-      p =>
-        p.nom.toLowerCase().includes(searchTerm) ||
-        (p.email && p.email.toLowerCase().includes(searchTerm))
+
+    const personFound = promoSourcePeople.find(p =>
+      p.nom.toLowerCase().includes(searchTerm) ||
+      (p.email && p.email.toLowerCase().includes(searchTerm))
     );
+
     if (personFound) {
       this.addPersonToEditableGroup(personFound);
       this.newPersonInput = '';
@@ -638,29 +591,19 @@ removePersonFromAllGroups(person: Person): void {
       this.editWorkGroupError = `Personne "${this.newPersonInput}" non trouvée.`;
     }
   }
+
   getAvailablePeopleForEditingGroup(): Person[] {
     if (!this.sourceGroupForBrief?.members || !this.editableWorkGroupData) {
       return [];
     }
+
     const currentMemberIds = new Set(
       this.editableWorkGroupData.members.map(m => m.id)
     );
+
     return this.sourceGroupForBrief.members.filter(
       p => !currentMemberIds.has(p.id)
     );
-  }
-
-  openDeleteWorkGroupConfirmModal(
-    workGroup: Promo,
-    event?: MouseEvent
-  ): void {
-    event?.stopPropagation();
-    this.workGroupToDelete = workGroup;
-    this.isDeleteWorkGroupConfirmModalOpen = true;
-  }
-  closeDeleteWorkGroupConfirmModal(): void {
-    this.isDeleteWorkGroupConfirmModalOpen = false;
-    this.workGroupToDelete = null;
   }
   confirmDeleteWorkGroup(): void {
     if (this.workGroupToDelete) {
@@ -668,38 +611,41 @@ removePersonFromAllGroups(person: Person): void {
         g => g.id !== this.workGroupToDelete!.id
       );
       this.hasUnsavedWorkGroupChanges = true;
+
       if (this.sourceGroupForBrief?.members) {
-        this.initializeUnassignedMembers(
-          this.sourceGroupForBrief.members
-        );
+        this.initializeUnassignedMembers(this.sourceGroupForBrief.members);
       }
+
       this.closeDeleteWorkGroupConfirmModal();
     }
   }
-
   private updateCollaborationHistory(workGroups: Promo[]): void {
-    workGroups.forEach(promo=> {
-      if (!promo.members) {
-        return;
-      }
-      const memberIds = promo.members.map(m => m.id.toString());
+    workGroups.forEach(group => {
+      if (!group.members) return;
+
+      const memberIds = group.members.map(m => m.id.toString());
+
       for (let i = 0; i < memberIds.length; i++) {
         const person1Id = memberIds[i];
+
         if (!this.collaborationHistory.has(person1Id)) {
           this.collaborationHistory.set(person1Id, new Set<string>());
         }
+
         for (let j = i + 1; j < memberIds.length; j++) {
           const person2Id = memberIds[j];
+
           this.collaborationHistory.get(person1Id)!.add(person2Id);
+
           if (!this.collaborationHistory.has(person2Id)) {
             this.collaborationHistory.set(person2Id, new Set<string>());
           }
+
           this.collaborationHistory.get(person2Id)!.add(person1Id);
         }
       }
     });
   }
-
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }

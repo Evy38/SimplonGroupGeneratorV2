@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 import { UserRole } from '../../core/services/models/user.model';
-
+import { tap } from 'rxjs/operators'
 @Component({
   selector: 'app-auth',
   standalone: true,
@@ -19,6 +19,10 @@ export class AuthComponent implements OnInit {
     email: '',
     password: ''
   };
+
+  ngOnInit(): void {
+    // Initialization logic can go here if needed
+  }
   loginError: string | null = null;
 
   isRegisterModalOpen: boolean = false;
@@ -52,19 +56,35 @@ export class AuthComponent implements OnInit {
     private readonly router: Router
   ) { }
 
-  ngOnInit(): void { }
 
   /** 🔐 Connexion */
   onLoginSubmit(): void {
-    this.authService.login(this.loginData.email, this.loginData.password).subscribe({
-      next: () => {
-        this.loginError = null;
-        this.router.navigate(['/profile']);
-      },
-      error: () => {
-        this.loginError = 'Identifiants invalides.';
-      }
-    });
+    // 1. Vérifie les données entrées par l'utilisateur
+    console.log('Données de connexion soumises :', this.loginData);
+
+    this.authService.login(this.loginData.email, this.loginData.password)
+      .pipe(
+
+        tap((response) => {
+          console.log('Réponse du backend :', response);
+        })
+      )
+      .subscribe({
+        next: () => {
+          this.loginError = null;
+          const user = this.authService.getCurrentUser();
+
+          if (user?.role === 'formateur') {
+            console.log('👤 user dans le composant:', user);
+            this.router.navigate(['/formateur']);
+          } else if (user?.role === 'apprenant') {
+            this.router.navigate(['/apprenant']);
+          } else {
+            this.router.navigate(['/profile']); // fallback
+          }
+        }
+
+      });
   }
 
   /** 🆕 Inscription Apprenant */
@@ -112,11 +132,11 @@ export class AuthComponent implements OnInit {
   }
 
   selectRole(role: 'apprenant' | 'formateur'): void {
-  this.registrationStep = role === 'apprenant' ? 'formApprenant' : 'formFormateur';
-}
+    this.registrationStep = role === 'apprenant' ? 'formApprenant' : 'formFormateur';
+  }
 
-backToRoleSelection(): void {
-  this.registrationStep = 'roleSelection';
-}
+  backToRoleSelection(): void {
+    this.registrationStep = 'roleSelection';
+  }
 
 }

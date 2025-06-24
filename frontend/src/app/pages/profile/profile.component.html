@@ -72,8 +72,8 @@
           @for (promo of userPromos; track promo.id) {
             <li>
               <strong>{{ promo.nom }}</strong>
-              @if (promo.formateurName) {
-                <p class="formateur-info">Formateur assigné : <strong>{{ promo.formateurName }}</strong></p>
+              @if (currentUser.firstname ) {
+                <p class="formateur-info">Formateur assigné : <strong>{{ currentUser.firstname }} {{ currentUser.lastname }}</strong></p>
               } @else {
                 <p class="formateur-info">Aucun formateur principal assigné à cette promo.</p>
               }

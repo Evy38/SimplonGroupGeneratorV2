@@ -9,15 +9,15 @@
       <div class="promo-card-image-link-wrapper">
         @if (promo.imageUrl) {
           <div class="promo-card-image">
-            <img [src]="promo.imageUrl" [alt]="promo.name">
+            <img [src]="promo.imageUrl" [alt]="promo.nom">
           </div>
         } @else {
           <div class="promo-card-image placeholder-image">
-            <span>{{ promo.name.substring(0,1).toUpperCase() || 'P' }}</span>
+            <span>{{ promo.nom.substring(0,1).toUpperCase() || 'P' }}</span>
           </div>
         }
         <div class="promo-card-content">
-          <h3 class="promo-name">{{ promo.name }}</h3>
+          <h3 class="promo-nom">{{ promo.nom }}</h3>
           <p class="promo-members-count">{{ promo.people?.length || 0 }} membre(s)</p>
         </div>
       </div>
@@ -50,8 +50,8 @@
 
     <form class="modal-form create-promo-form" (ngSubmit)="onSavePromoSubmit()">
       <div class="form-group">
-        <label for="promo-name">Nom de la Promo :</label>
-        <input type="text" id="promo-name" name="promoName" placeholder="Ex: Les Poneys Agile" required [(ngModel)]="currentPromoData.nom">
+        <label for="promo-nom">Nom de la Promo :</label>
+        <input type="text" id="promo-nom" name="promoName" placeholder="Ex: Les Poneys Agile" required [(ngModel)]="currentPromoData.nom">
       </div>
 
       <div class="form-group">
@@ -108,7 +108,7 @@
       <h2>Confirmer la Suppression</h2>
     </div>
     <div class="modal-body">
-      <p>Êtes-vous sûr de vouloir supprimer la promo "<strong>{{ promoToDelete.name }}</strong>" ?</p>
+      <p>Êtes-vous sûr de vouloir supprimer la promo "<strong>{{ promoToDelete.nom }}</strong>" ?</p>
       <p class="warning-text">Cette action est irréversible et la promo ne pourra plus être assignée à des briefs.</p>
     </div>
     <div class="modal-footer buttons confirm-delete-buttons">
@@ -124,7 +124,7 @@
   <div class="modal-content members-promo-modal-content" (click)="$event.stopPropagation()" (keydown)="$event.stopPropagation()">
     <button class="modal-close-button" (click)="closePromoMembersModal()" aria-label="Fermer">×</button>
     <div class="modal-header">
-      <h2>Membres de la Promo : {{ selectedPromoForMembers.name }}</h2>
+      <h2>Membres de la Promo : {{ selectedPromoForMembers.nom }}</h2>
     </div>
     <div class="modal-body members-list-body">
       @if (selectedPromoForMembers.people && selectedPromoForMembers.people.length > 0) {

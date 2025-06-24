@@ -16,10 +16,10 @@ export class FormateurDashboardComponent implements OnInit {
   constructor(private readonly authService: AuthService) {}
 
   ngOnInit(): void {
-    const currentUser = this.authService.currentUserValue;
-
-    if (currentUser?.firstname && currentUser?.lastname) {
-      this.userName = `${currentUser.firstname} ${currentUser.lastname}`;
-    }
+    this.authService.currentUser$.subscribe(currentUser => {
+      if (currentUser?.firstname && currentUser?.lastname) {
+        this.userName = `${currentUser.firstname} ${currentUser.lastname}`;
+      }
+    });
   }
 }

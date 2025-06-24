@@ -19,16 +19,16 @@
             <div class="apprenant-brief-card-main">
               <div class="brief-card-image apprenant-brief-image">
                 @if (brief.imageUrl) {
-                  <img [src]="brief.imageUrl" [alt]="brief.title">
+                  <img [src]="brief.imageUrl" [alt]="brief.name">
                 } @else {
                   <div class="apprenant-brief-image-placeholder">
-                    <span>{{ brief.title ? brief.title.substring(0,1).toUpperCase() : 'B' }}</span>
+                    <span>{{ brief.name ? brief.name.substring(0,1).toUpperCase() : 'B' }}</span>
                   </div>
                 }
               </div>
 
               <div class="brief-card-content apprenant-brief-content">
-                <h3 class="brief-name">{{ brief.title }}</h3>
+                <h3 class="brief-name">{{ brief.name }}</h3>
                 <p class="brief-description">
                   {{ brief.description | slice:0:40 }}{{ brief.description.length > 40 ? '...' : '' }}
                 </p>
@@ -73,13 +73,13 @@
       <button class="modal-close-button" (click)="closeBriefDetailModal()" aria-label="Fermer la modale">×</button>
 
       <div class="modal-header">
-        <h2>{{ selectedBriefForModal.title }}</h2>
+        <h2>{{ selectedBriefForModal.name }}</h2>
       </div>
 
       <div class="modal-body brief-detail-modal-body">
         @if (selectedBriefForModal.imageUrl) {
           <div class="brief-detail-image-container">
-            <img [src]="selectedBriefForModal.imageUrl" [alt]="selectedBriefForModal.title" class="brief-detail-image">
+            <img [src]="selectedBriefForModal.imageUrl" [alt]="selectedBriefForModal.name" class="brief-detail-image">
           </div>
         }
 

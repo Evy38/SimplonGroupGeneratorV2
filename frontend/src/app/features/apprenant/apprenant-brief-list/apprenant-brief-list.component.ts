@@ -29,49 +29,60 @@ export class ApprenantBriefListComponent implements OnInit, OnDestroy {
   isBriefDetailModalOpen: boolean = false;
   selectedBriefForModal: Brief | null = null;
 
+  promoNamesById: Map<number, string> = new Map();
+
+
   constructor(
     private readonly authService: AuthService,
     private readonly briefService: BriefService,
     private readonly promoService: PromoService
-  ) {}
+  ) { }
 
-  ngOnInit(): void {
-    this.currentUser = this.authService.currentUserValue;
+ngOnInit(): void {
+  this.subscriptions.add(
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+      this.tryLoadBriefsForCurrentUser();
+    })
+  );
+}
 
-    if (this.currentUser?.email) {
-      this.subscriptions.add(
-        this.promoService.promos$.subscribe((promos: Promo[]) => {
-          const matchedPromo = promos.find(promo =>
-            promo.members?.some(member => member.email === this.currentUser?.email)
-          );
+private tryLoadBriefsForCurrentUser(): void {
+  if (!this.currentUser?.email) return;
 
-          if (matchedPromo) {
-            this.briefService.getBriefsByPromoId(String(matchedPromo.id)).subscribe({
-              next: (briefs) => {
-                this.apprenantBriefs = briefs;
-                this.isLoading = false;
-              },
-              error: (err) => {
-                console.error('Erreur lors du chargement des briefs :', err);
-                this.errorMessage = 'Erreur lors du chargement des briefs.';
-                this.isLoading = false;
-              }
-            });
-          } else {
-            this.errorMessage = "Aucune promo trouvée pour l'utilisateur.";
+  this.subscriptions.add(
+    this.promoService.getAllPromos().subscribe((promos: Promo[]) => {
+      const matchedPromo = promos.find(promo =>
+        promo.members?.some(member => member.email === this.currentUser?.email)
+      );
+
+      if (matchedPromo) {
+        this.briefService.getBriefsByPromoId(String(matchedPromo.id)).subscribe({
+          next: (briefs) => {
+            this.apprenantBriefs = briefs;
+            this.isLoading = false;
+          },
+          error: (err) => {
+            console.error('Erreur lors du chargement des briefs :', err);
+            this.errorMessage = 'Erreur lors du chargement des briefs.';
             this.isLoading = false;
           }
-        })
-      );
-    }
-  }
+        });
+      } else {
+        this.errorMessage = "Aucune promo trouvée pour l'utilisateur.";
+        this.isLoading = false;
+      }
+    })
+  );
+}
 
-  openBriefDetail(brief: Brief): void {
+
+  openBriefDetailModal(brief: Brief): void {
     this.selectedBriefForModal = brief;
     this.isBriefDetailModalOpen = true;
   }
 
-  closeBriefDetail(): void {
+  closeBriefDetailModal(): void {
     this.selectedBriefForModal = null;
     this.isBriefDetailModalOpen = false;
   }
@@ -79,4 +90,12 @@ export class ApprenantBriefListComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
+
+getPromoName(promoId: number | string | undefined): string {
+  if (!promoId) return 'Inconnue';
+  return this.promoNamesById.get(Number(promoId)) ?? `Promo ${promoId}`;
+}
+
+
+
 }

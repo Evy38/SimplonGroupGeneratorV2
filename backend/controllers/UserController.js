@@ -90,7 +90,21 @@ const UserController = {
         { expiresIn: "1d" }
       );
 
-      res.json({ message: "Connexion réussie", token });
+     res.json({
+  message: "Connexion réussie",
+  token,
+  user: {
+    id: user.id,
+    firstname: user.firstname,
+    lastname: user.lastname,
+    email: user.email,
+    role: user.role,
+    is_active: user.is_active,
+    created_at: user.created_at,
+    cgu_accepted_at: user.cgu_accepted_at
+  }
+});
+
     });
   },
 

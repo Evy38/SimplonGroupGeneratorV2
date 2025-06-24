@@ -7,4 +7,5 @@ export interface Promo {
   imageUrl?: string;     // correspond à imageUrl (OK ✅)
   formateur?: User;      // correspond à user_id (OK ✅ )
   people?: Person[];     // correspond à toutes les personnes qui ont promo_id = cette promo
+  members?: Person[];
 }

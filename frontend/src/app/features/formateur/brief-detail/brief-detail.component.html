@@ -21,7 +21,7 @@
   @if (generatedWorkGroups.length > 0) {
     <div class="work-group-list-container">
       @for (group of generatedWorkGroups; let i = $index; track i) {
-        <div class="work-group-card" [class.highlight-drop-zone]="hoveredGroupId === group.id">
+        <div class="work-group-card" [class.highlight-drop-zone]="hoveredGroupId === group.id.toString()">
           <div class="work-group-header">
             <h4 class="work-group-name">{{ group.nom }}</h4>
             <div class="work-group-actions">

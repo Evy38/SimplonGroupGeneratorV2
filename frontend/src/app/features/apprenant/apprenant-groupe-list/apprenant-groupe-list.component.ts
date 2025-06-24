@@ -15,9 +15,9 @@ export interface ApprenantGroupDisplayInfo {
   briefId: string;
   briefTitle: string;
   briefImageUrl?: string;
-  groupId: string | number; // L'ID du sous-groupe
+  groupId: string | number;
   groupName: string;
-  groupMembers: Person[]; // Coéquipiers (sans l'apprenant actuel)
+  groupMembers: Person[];
 }
 
 @Component({
@@ -31,7 +31,6 @@ export class ApprenantGroupeListComponent implements OnInit, OnDestroy {
   private readonly authService = inject(AuthService);
   private readonly briefService = inject(BriefService);
   private readonly subscriptions = new Subscription();
-  
 
   currentUser: User | null = null;
   displayedGroupsInfo: ApprenantGroupDisplayInfo[] = [];
@@ -39,104 +38,99 @@ export class ApprenantGroupeListComponent implements OnInit, OnDestroy {
   errorMessage: string | null = null;
 
   selectedBriefId: string | null = null;
-  selectedBrief: any = null; // Ajout de la propriété pour stocker le brief sélectionné
-isBriefModalOpen: boolean = false;
-
-openBriefModal(briefId: string): void {
-  this.briefService.getBriefById(briefId).subscribe({
-    next: (brief) => {
-      this.selectedBrief = brief;
-      this.isBriefModalOpen = true;
-    },
-    error: () => {
-      this.selectedBrief = null;
-      this.isBriefModalOpen = false;
-      this.errorMessage = "Impossible de charger le brief.";
-    }
-  });
-}
-
-
-closeBriefModal(): void {
-  this.selectedBrief = null;
-  this.isBriefModalOpen = false;
-}
-
-
+  selectedBrief: any = null;
+  isBriefModalOpen: boolean = false;
 
   ngOnInit(): void {
-    this.currentUser = this.authService.currentUserValue;
+    const sub = this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
 
-    if (this.currentUser && this.currentUser.role === 'apprenant' && this.currentUser.promoId) {
-      console.log(`ApprenantGroupeList: Initialisation pour l'utilisateur ID ${this.currentUser.id} et promoId ${this.currentUser.promoId}`);
-      this.loadUserGroups(this.currentUser.id, this.currentUser.promoId!);
-    } else {
-      console.error("ApprenantGroupeList: currentUser, rôle, ou promoId manquant.", this.currentUser);
-      this.errorMessage = "Informations utilisateur ou de promotion manquantes pour afficher vos groupes.";
-      this.isLoading = false;
-    }
-  }
-
-  loadUserGroups(userId: string, userPromoId: string): void {
-    this.isLoading = true;
-    this.errorMessage = null;
-    console.log(`ApprenantGroupeList: Appel de loadUserGroups avec userId: ${userId}, userPromoId: ${userPromoId}`);
-
-    const briefsSub = this.briefService.getBriefsByPromoId(userPromoId).pipe(
-      map(briefsFromPromo => {
-        const groupsList: ApprenantGroupDisplayInfo[] = [];
-        console.log(`ApprenantGroupeList - Briefs reçus pour la promo '${userPromoId}':`, JSON.parse(JSON.stringify(briefsFromPromo))); // Copie profonde pour le log
-
-        briefsFromPromo.forEach(brief => {
-          console.log(`ApprenantGroupeList - Traitement du brief: "${brief.title}" (ID: ${brief.id})`);
-          // Vérifier si le brief a la propriété 'groups' et qu'elle n'est pas vide
-          if (brief.groups && Array.isArray(brief.groups) && brief.groups.length > 0) {
-            console.log(`ApprenantGroupeList - Brief "${brief.title}" a ${brief.groups.length} sous-groupe(s).`);
-            brief.groups.forEach(workGroup => {
-              console.log(`ApprenantGroupeList --- Vérification du sous-groupe "${workGroup.nom}" (ID: ${workGroup.id}) avec ${workGroup.members.length} membre(s)`);
-              // Vérifier si l'apprenant actuel est membre de ce sous-groupe
-              const isMember = workGroup.members.some(member => member.id === userId);
-              console.log(`ApprenantGroupeList --- L'utilisateur ${userId} est membre de "${workGroup.nom}" ? ${isMember}`);
-              if (isMember) {
-                groupsList.push({
-                  briefId: brief.id,
-                  briefTitle: brief.title,
-                  briefImageUrl: brief.imageUrl,
-                  groupId: workGroup.id,
-                  groupName: workGroup.nom,
-                  groupMembers: this.getGroupMembersExcludingUser(workGroup.members, userId)
-                });
-              }
-            });
-          } else {
-            console.log(`ApprenantGroupeList - Le brief "${brief.title}" (ID: ${brief.id}) n'a pas de propriété 'groups' valide ou elle est vide.`);
-          }
-        });
-        return groupsList;
-      })
-    ).subscribe({
-      next: (displayList) => {
-        this.displayedGroupsInfo = displayList;
-        console.log('ApprenantGroupeList - Liste finale pour affichage (displayedGroupsInfo):', this.displayedGroupsInfo);
-        if (this.displayedGroupsInfo.length === 0) {
-          console.log("ApprenantGroupeList - Aucun groupe de travail trouvé pour cet apprenant après filtrage complet.");
-        }
-        this.isLoading = false;
-      },
-      error: (err: any) => {
-        console.error("ApprenantGroupeList - Erreur lors du chargement des groupes de l'apprenant:", err);
-        this.errorMessage = "Une erreur est survenue lors de la récupération de vos groupes.";
+      if (
+        this.currentUser &&
+        this.currentUser.role === 'apprenant' &&
+        this.currentUser.promoId
+      ) {
+        console.log(`ApprenantGroupeList: Initialisation pour l'utilisateur ID ${this.currentUser.id} et promoId ${this.currentUser.promoId}`);
+        this.loadUserGroups(Number(this.currentUser.id), Number(this.currentUser.promoId));
+      } else {
+        console.error("ApprenantGroupeList: currentUser, rôle, ou promoId manquant.", this.currentUser);
+        this.errorMessage = "Informations utilisateur ou de promotion manquantes pour afficher vos groupes.";
         this.isLoading = false;
       }
     });
-    this.subscriptions.add(briefsSub);
+
+    this.subscriptions.add(sub);
+  }
+
+loadUserGroups(userId: number, userPromoId: number): void {
+  this.isLoading = true;
+  this.errorMessage = null;
+
+  const briefsSub = this.briefService.getBriefsByPromoId(String(userPromoId)).pipe(
+    map(briefsFromPromo => {
+      const groupsList: ApprenantGroupDisplayInfo[] = [];
+
+      briefsFromPromo.forEach(brief => {
+        if (brief.groups && Array.isArray(brief.groups) && brief.groups.length > 0) {
+          brief.groups.forEach(workGroup => {
+            const isMember = workGroup.members?.some(member => member.id === userId);
+            if (isMember) {
+              groupsList.push({
+                briefId: String(brief.id),
+                briefTitle: brief.name, // <-- remplacé title par name
+                briefImageUrl: brief.imageUrl,
+                groupId: workGroup.id,
+                groupName: workGroup.nom,
+                groupMembers: this.getGroupMembersExcludingUser(workGroup.members ?? [], userId)
+              });
+            }
+          });
+        }
+      });
+
+      return groupsList;
+    })
+  ).subscribe({
+    next: (displayList) => {
+      this.displayedGroupsInfo = displayList;
+      this.isLoading = false;
+    },
+    error: (err: any) => {
+      console.error("Erreur lors du chargement des groupes de l'apprenant:", err);
+      this.errorMessage = "Une erreur est survenue lors de la récupération de vos groupes.";
+      this.isLoading = false;
+    }
+  });
+
+  this.subscriptions.add(briefsSub);
+}
+
+
+  openBriefModal(briefId: string): void {
+    this.briefService.getBriefById(briefId).subscribe({
+      next: (brief) => {
+        this.selectedBrief = brief;
+        this.isBriefModalOpen = true;
+      },
+      error: () => {
+        this.selectedBrief = null;
+        this.isBriefModalOpen = false;
+        this.errorMessage = "Impossible de charger le brief.";
+      }
+    });
+  }
+
+  closeBriefModal(): void {
+    this.selectedBrief = null;
+    this.isBriefModalOpen = false;
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
 
-  private getGroupMembersExcludingUser(members: Person[], userId: string): Person[] {
-    return members.filter(member => member.id !== userId);
-  }
+ private getGroupMembersExcludingUser(members: Person[], userId: number): Person[] {
+  return members.filter(member => member.id !== userId);
+}
+
 }

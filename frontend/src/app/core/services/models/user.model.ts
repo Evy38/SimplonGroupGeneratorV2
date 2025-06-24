@@ -13,4 +13,5 @@ export interface User {
   is_active?: boolean;
   created_at?: string;
   cgu_accepted_at?: string;
+  promoId?: number;
 }

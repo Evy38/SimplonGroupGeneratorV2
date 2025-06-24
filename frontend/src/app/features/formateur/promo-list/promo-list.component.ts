@@ -88,7 +88,7 @@ export class PromoListComponent implements OnInit, OnDestroy {
     }
 
     const promoPayload = {
-      name: this.currentPromoData.nom.trim(),
+      nom: this.currentPromoData.nom.trim(),
       members: this.currentPromoData.members,
       imageUrl: this.currentPromoData.imageUrl?.trim() ?? undefined,
       formateurName: 'Formateur Test'
@@ -98,13 +98,13 @@ export class PromoListComponent implements OnInit, OnDestroy {
       const promoId = typeof this.currentPromoData.id === 'string' ? parseInt(this.currentPromoData.id, 10) : this.currentPromoData.id;
       this.promoService.updatePromo(promoId, promoPayload).subscribe(() => {
         this.refreshPromos();
-        this.formSuccess = `Promo "${promoPayload.name}" modifiée avec succès.`;
+        this.formSuccess = `Promo "${promoPayload.nom}" modifiée avec succès.`;
         setTimeout(() => this.closeCreateOrEditModal(), 1500);
       });
     } else {
       this.promoService.createPromo(promoPayload).subscribe(() => {
         this.refreshPromos();
-        this.formSuccess = `Promo "${promoPayload.name}" créée avec succès.`;
+        this.formSuccess = `Promo "${promoPayload.nom}" créée avec succès.`;
         setTimeout(() => this.closeCreateOrEditModal(), 1500);
       });
     }

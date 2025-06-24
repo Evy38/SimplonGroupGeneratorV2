@@ -15,11 +15,10 @@
             <p class="brief-description">
               {{ brief.description | slice:0:70 }}{{ brief.description.length > 70 ? '...' : '' }}
             </p>
-            <p class="brief-assigned-group">Promo source : <strong>{{ brief.id }}</strong></p>
+           <p class="brief-assigned-group">Promo source : <strong>{{ brief.sourceGroupId }}</strong></p>
 
-          
 
-            @if (selectedBriefId === +brief.id) {
+            @if (selectedBriefId === brief.id) {
               @if (promos$ | async; as resolvedPromos) {
                 <div class="assign-group-form">
                   <select [(ngModel)]="selectedGroupId">
@@ -62,12 +61,11 @@
 
 <!-- MODALE DE CRÉATION/MODIFICATION DE BRIEF -->
 @if (isCreateBriefModalOpen) {
-  <div class="modal-overlay full-screen-modal-overlay"
+  <dialog class="modal-overlay full-screen-modal-overlay"
        (click)="closeCreateBriefModal()"
-       tabindex="0"
-       role="dialog"
        (keydown)="handleModalKeyDown($event)"
-       aria-label="Créer ou modifier un brief">
+       aria-label="Créer ou modifier un brief"
+       open>
 
     <div class="modal-content large-modal-content brief-modal-content"
          (click)="$event.stopPropagation()" (keydown)="handleModalKeyDown($event)">
@@ -127,10 +125,8 @@
         </div>
       </form>
     </div>
-  </div>
+  </dialog>
 }
-
-
 
 <!-- MODALE DE CONFIRMATION DE SUPPRESSION -->
 @if (isConfirmDeleteModalOpen) {

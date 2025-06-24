@@ -33,21 +33,25 @@ export class ProfileComponent implements OnInit {
     private readonly authService: AuthService,
     private readonly promoService: PromoService,
     private readonly router: Router
-  ) {}
+  ) { }
 
   ngOnInit(): void {
-    this.currentUser = this.authService.currentUserValue;
+    this.authService.currentUser$.subscribe(user => {
+      this.currentUser = user;
+    });
+
 
     if (this.currentUser?.email) {
-      this.promoService.promos$.subscribe((promos: Promo[]) => {
-        this.userPromos = promos.filter((p: Promo) =>
-          p.members?.some((m: Person) => m.email === this.currentUser?.email)
+      this.promoService.getAllPromos().subscribe((promos: Promo[]) => {
+        this.userPromos = promos.filter(p =>
+          p.people?.some(m => m.email === this.currentUser?.email)
         );
-        const promo: Promo | undefined = this.userPromos[0];
+        const promo = this.userPromos[0];
         if (promo) {
-          this.personDetails = promo.members?.find((m: Person) => m.email === this.currentUser?.email) || null;
+          this.personDetails = promo.people?.find(m => m.email === this.currentUser?.email) || null;
         }
       });
+
     }
   }
 

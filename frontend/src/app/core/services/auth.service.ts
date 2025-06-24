@@ -10,27 +10,36 @@ import { User } from './models/user.model';
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:3000/api/auth';
+  private readonly apiUrl = 'http://localhost:3000/api/users';
   private readonly currentUserSubject = new BehaviorSubject<User | null>(null);
   public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private readonly http: HttpClient, private readonly router: Router) {
-    const savedUser = localStorage.getItem('currentUser');
-    if (savedUser) {
-      this.currentUserSubject.next(JSON.parse(savedUser));
+constructor(private readonly http: HttpClient, private readonly router: Router) {
+  const savedUser = localStorage.getItem('currentUser');
+  if (savedUser) {
+    try {
+      const parsedUser = JSON.parse(savedUser);
+      this.currentUserSubject.next(parsedUser);
+    } catch (e) {
+      console.error("❌ Erreur parsing JSON depuis localStorage:", e);
+      localStorage.removeItem('currentUser');
     }
   }
+}
+
 
   /** 🔐 Connexion */
-  login(email: string, password: string): Observable<{ token: string; user: User }> {
-    return this.http.post<{ token: string; user: User }>(`${this.apiUrl}/login`, { email, password }).pipe(
-      tap(response => {
-        localStorage.setItem('token', response.token);
-        localStorage.setItem('currentUser', JSON.stringify(response.user));
-        this.currentUserSubject.next(response.user);
-      })
-    );
-  }
+login(email: string, password: string): Observable<{ token: string; user: User }> {
+  return this.http.post<{ token: string; user: User }>(`${this.apiUrl}/login`, { email, password }).pipe(
+    tap(response => {
+        console.log('🟢 Login response:', response);
+      localStorage.setItem('token', response.token);
+      localStorage.setItem('currentUser', JSON.stringify(response.user));
+      this.currentUserSubject.next(response.user);
+    })
+  );
+}
+
 
   /** 🆕 Inscription */
   register(userData: Partial<User>): Observable<any> {
@@ -86,4 +95,11 @@ export class AuthService {
       Authorization: `Bearer ${token}`
     });
   }
+
+  updateUserPassword(userId: number, newPassword: string): Observable<any> {
+    return this.http.put(`${this.apiUrl}/users/${userId}/password`, { newPassword }, {
+      headers: this.getAuthHeaders()
+    });
+  }
+
 }

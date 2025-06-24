@@ -9,13 +9,8 @@ import { AuthService } from '../../../../core/services/auth.service'; // Ajuste
   standalone: true,
   imports: [RouterModule, CommonModule],
   templateUrl: './apprenant-sidebar.component.html',
-  // IMPORTANT: Utilise les MÊMES styles que ta sidebar partagée si le look doit être identique.
-  // Si tu avais 'sidebar.component.css' pour le formateur, utilise-le.
-  // Ou si 'apprenant-sidebar.component.css' est une copie exacte avec juste les liens qui changent, c'est bon.
-  styleUrls: [
-    '../../../../shared/components/sidebar/sidebar.component.css', // SI TU VEUX LE MÊME LOOK QUE CELLE DU FORMATEUR
-    // './apprenant-sidebar.component.css' // Ou tes styles spécifiques s'ils sont déjà comme tu veux
-  ]
+  styleUrls: ['../../../sidebar/sidebar.component.css']
+
 })
 export class ApprenantSidebarComponent implements OnInit { // Ou SidebarComponent
   // isSidebarOpen = false;
@@ -26,8 +21,8 @@ export class ApprenantSidebarComponent implements OnInit { // Ou SidebarComponen
   @Output() sidebarToggled = new EventEmitter<boolean>();
 
   constructor(
-    private authService: AuthService, // S'assurer que AuthService est importé
-    private router: Router // S'assurer que Router est importé
+    private readonly authService: AuthService, // S'assurer que AuthService est importé
+    private readonly router: Router // S'assurer que Router est importé
   ) {}
 
   // ... ngOnInit, onWindowResize, checkScreenWidth, toggle, emitSidebarState, logout ...

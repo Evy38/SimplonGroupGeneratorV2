@@ -54,4 +54,15 @@ export class BriefService {
     const headers = { 'Authorization': `Bearer ${token}` };
     return this.http.get<any[]>(`${this.apiUrl}/${briefId}/groups`, { headers });
   }
+
+  assignGroupToBrief(briefId: number, groupId: number): Observable<any> {
+  const token = localStorage.getItem('token');
+  const headers = { 'Authorization': `Bearer ${token}` };
+
+  return this.http.post(`${this.apiUrl}/assign`, {
+    brief_id: briefId,
+    group_id: groupId
+  }, { headers });
+}
+
 }
