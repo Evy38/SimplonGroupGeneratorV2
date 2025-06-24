@@ -1,6 +1,7 @@
 // src/app/shared/components/sidebar/sidebar.component.ts
 import { Component } from '@angular/core';
-import { AuthService } from '../../../core/services/auth.service';
+// Update the import path if necessary, or create the file if it does not exist
+import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router'; // Pour routerLink, routerLinkActive
 

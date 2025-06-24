@@ -1,7 +1,6 @@
 // src/app/features/formateur/formateur-layout/formateur-layout.component.ts
 import { Component, HostListener } from '@angular/core';
 import { RouterModule } from '@angular/router'; // Pour <router-outlet>
-import { SidebarComponent } from '../../../shared/components/sidebar/sidebar.component'; // Importer la sidebar
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,7 +8,6 @@ import { CommonModule } from '@angular/common';
   standalone: true,
   imports: [
     RouterModule,       // Nécessaire pour <router-outlet>
-    SidebarComponent,
     CommonModule    // Importer et déclarer le composant sidebar
   ],
   templateUrl: './formateur-layout.component.html',
