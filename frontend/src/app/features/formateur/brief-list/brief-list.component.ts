@@ -8,6 +8,8 @@ import { Brief } from '../../../core/services/models/brief.model';
 import { Promo } from '../../../core/services/models/promo.model';
 import { BriefService } from '../../../core/services/brief.service';
 import { PromoService } from '../../../core/services/promo.service';
+import { User } from '../../../core/services/models/user.model';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-brief-list',
@@ -46,9 +48,14 @@ export class BriefListComponent implements OnInit {
 
   groupsMap: { [briefId: number]: any[] } = [];
 
+  currentUser: User | null = null; 
+
+
+
   constructor(
     private readonly briefService: BriefService,
-    private readonly promoService: PromoService
+    private readonly promoService: PromoService,
+     private readonly authService: AuthService
   ) {
     this.briefs$ = this.briefService.getBriefsByMe();
     this.promos$ = this.promoService.getAllPromos().pipe(
@@ -56,16 +63,15 @@ export class BriefListComponent implements OnInit {
     );
   }
 
-  ngOnInit(): void {
-    this.briefs$.subscribe(briefs => {
-      for (let brief of briefs) {
-        this.briefService.getGroupsForBrief(brief.id).subscribe({
-          next: (groups) => this.groupsMap[brief.id] = groups,
-          error: (err) => console.error("Erreur groupes :", err)
-        });
-      }
-    });
+ngOnInit(): void {
+  this.currentUser = this.authService.getCurrentUser();
+
+  if (this.currentUser?.role === 'formateur') {
+    this.briefs$ = this.briefService.getBriefsByMe();
+  } else if (this.currentUser?.promoId) {
+    this.briefs$ = this.briefService.getBriefsByPromoId(this.currentUser.promoId.toString());
   }
+}
 
   openCreateBriefModal(): void {
     this.isEditMode = false;

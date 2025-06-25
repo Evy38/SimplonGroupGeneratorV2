@@ -15,4 +15,6 @@ router.post("/assign", verifyToken, BriefController.assignBriefToGroup);
 // 👥 Voir tous les groupes assignés à un brief
 router.get("/:id/groups", verifyToken, BriefController.getGroupsForBrief);
 
+router.get('/me', verifyToken, BriefController.getBriefsByMe);
+
 module.exports = router;

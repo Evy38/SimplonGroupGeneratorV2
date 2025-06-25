@@ -51,7 +51,22 @@ const BriefController = {
       console.error("Erreur lors de la récupération des groupes :", err);
       res.status(500).json({ error: "Erreur serveur" });
     }
+  },
+
+// 🔐 Récupérer les briefs du formateur connecté
+getBriefsByMe: async (req, res) => {
+  const userId = req.user.id;
+
+  try {
+    const [briefs] = await db.query("SELECT * FROM briefs WHERE user_id = ?", [userId]);
+    res.status(200).json(briefs);
+  } catch (err) {
+    console.error("Erreur lors de la récupération des briefs du formateur :", err);
+    res.status(500).json({ error: "Erreur serveur" });
   }
+}
+
+
 };
 
 module.exports = BriefController;
